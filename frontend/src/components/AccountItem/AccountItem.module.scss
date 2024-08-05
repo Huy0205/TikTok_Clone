@@ -1,0 +1,32 @@
+.wrapper {
+    padding: 9px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.avatar-custom {
+    margin-right: 12px;
+}
+
+.info {
+    flex: 1;
+}
+
+.tiktokId {
+    font-size: 1.6rem;
+    line-height: 21px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.nickname {
+    font-size: 1.4rem;
+    line-height: 18px;
+    color: rgba(22, 24, 35, 0.5);
+    font-weight: 400;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

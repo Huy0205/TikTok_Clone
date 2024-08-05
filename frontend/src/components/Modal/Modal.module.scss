@@ -1,0 +1,197 @@
+.container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 300ms cubic-bezier(0.075, 0.82, 0.165, 1);
+    background-color: rgba(0, 0, 0, 0.5);
+    visibility: hidden;
+}
+
+.wrapper {
+    --color-bottom: rgb(22, 24, 35);
+
+    display: flex;
+    flex-direction: column;
+    width: 483px;
+    height: 642px;
+    border-radius: 8px;
+    transition: transform 300ms cubic-bezier(0.075, 0.82, 0.165, 1);
+    background-color: var(--white);
+}
+
+.modal-top {
+    display: flex;
+    justify-content: flex-end;
+    padding: 18px;
+}
+
+.close-button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 2.4rem;
+    background: rgba(22, 24, 35, 0.03);
+}
+
+.modal-center {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+}
+
+.modal-content {
+    padding: 0 12%;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.2rem;
+    padding-bottom: 20px;
+}
+
+.modal-body {
+    flex: 1;
+}
+
+// Login
+.input-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    &:not(:last-child) {
+        margin-bottom: 20px;
+    }
+}
+
+.label {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-bottom);
+}
+
+.input-item {
+    display: flex;
+    border-radius: 2px;
+    border: 1px solid rgba(22, 24, 35, 0.12);
+}
+
+.button-right,
+.textfile {
+    background-color: rgba(22, 24, 35, 0.06);
+}
+
+.textfile {
+    flex: 1;
+    padding: 12px;
+    font-size: 1.6rem;
+    caret-color: rgb(254, 44, 85);
+}
+
+.button-right {
+    padding-right: 20px;
+    font-size: 1.6rem;
+}
+
+.forgot-password {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--color-bottom);
+}
+
+.more-style-login-button {
+    margin-top: 20px;
+}
+
+// Register
+.select-container {
+    display: flex;
+    gap: 8px;
+}
+
+.select-wrapper {
+    flex: 1;
+    display: flex;
+    border-radius: 4px;
+    background: rgba(22, 24, 35, 0.06);
+}
+
+.select {
+    flex: 1;
+    padding: 15px;
+    border: 0;
+    font-size: 1.6rem;
+    outline: none;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M137.4 374.6c12.5 12.5 32.8 12.5 45.3 0l128-128c9.2-9.2 11.9-22.9 6.9-34.9s-16.6-19.8-29.6-19.8L32 192c-12.9 0-24.6 7.8-29.6 19.8s-2.2 25.7 6.9 34.9l128 128z"/></svg>')
+        no-repeat right 15px center / 12px;
+
+    &.active {
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M182.6 137.4c-12.5-12.5-32.8-12.5-45.3 0l-128 128c-9.2 9.2-11.9 22.9-6.9 34.9s16.6 19.8 29.6 19.8l256 0c12.9 0 24.6-7.8 29.6-19.8s2.2-25.7-6.9-34.9l-128-128z"/></svg>')
+            no-repeat right 15px center / 12px;
+    }
+}
+
+.note-text {
+    color: rgba(22, 24, 35, 0.5);
+    font-size: 1.4rem;
+}
+
+.button-right.borderButtonLeft {
+    padding-left: 12px;
+    border-left: 2px solid rgba(22, 24, 35, 0.12);
+}
+
+.button-right.buttonDisable {
+    background-color: rgba(22, 24, 35, 0.06);
+    color: rgba(22, 24, 35, 0.5);
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.modal-bottom {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    border-top: 0.5px solid rgba(22, 24, 35, 0.12);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-bottom);
+}
+
+.change-form {
+    padding: 0;
+    margin-left: 6px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary);
+
+    &:hover {
+        background-color: transparent;
+        text-decoration: underline;
+    }
+}
+
+.showModal {
+    visibility: visible;
+}
+
+.loading {
+    animation: spiner 0.8s linear infinite;
+}
+
+@keyframes spiner {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

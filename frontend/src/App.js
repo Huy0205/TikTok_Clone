@@ -1,0 +1,56 @@
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { publicRoutes } from '~/routes';
+import { DefaultLayout } from '~/layout';
+import { UserServices } from '~/services';
+import { AuthContext } from '~/contexts/AuthContext';
+
+function App() {
+    const [loading, setLoading] = useState(false);
+    const { setAuth } = useContext(AuthContext);
+
+    useEffect(() => {
+        setLoading(true);
+        const fetchAccount = async () => {
+            const response = await UserServices.getAccount();
+            if (response?.data) {
+                setAuth({
+                    isAuthenticated: true,
+                    user: response.data,
+                });
+            }
+            setLoading(false);
+        };
+        fetchAccount();
+    }, []);
+
+    if (loading) return <div>Loading...</div>;
+
+    return (
+        <Router>
+            <Routes>
+                {publicRoutes.map((route, index) => {
+                    const Page = route.component;
+                    let Layout = DefaultLayout;
+
+                    if (route.layout) Layout = route.layout;
+                    else if (route.layout === null) Layout = Fragment;
+
+                    return (
+                        <Route
+                            key={index}
+                            path={route.path}
+                            element={
+                                <Layout>
+                                    <Page />
+                                </Layout>
+                            }
+                        />
+                    );
+                })}
+            </Routes>
+        </Router>
+    );
+}
+
+export default App;

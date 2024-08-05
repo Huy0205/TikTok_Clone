@@ -1,0 +1,39 @@
+// Menu
+.content {
+    --padding-high-level: 10px 24px;
+
+    min-width: 223px;
+    margin-right: 8px;
+    background-color: rgb(255, 255, 255);
+}
+
+.high-level-custom {
+    font-size: 1.4rem;
+    font-weight: 400;
+    padding: var(--padding-high-level);
+}
+
+// Item
+.has-top-line {
+    border-top: 1px solid rgba(22, 24, 35, 0.12);
+}
+
+// Header
+.header-wrapper {
+    display: flex;
+    align-items: center;
+    position: relative;
+    height: 50px;
+    padding: var(--padding-high-level);
+    font-weight: 600;
+}
+
+.back-button {
+    font-size: 1.8rem;
+}
+
+.header-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}

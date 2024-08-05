@@ -1,0 +1,82 @@
+.wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 4px;
+    border: 1px solid rgba(22, 24, 35, 0.12);
+    gap: 8px;
+}
+
+.medium {
+    min-width: 36px;
+    min-height: 36px;
+    padding: 6px 10px;
+    font-weight: 700;
+    font-size: 1.6rem;
+    line-height: 21px;
+
+    &:hover {
+        background-color: rgba(22, 24, 35, 0.03);
+    }
+}
+
+.large {
+    width: 100%;
+    border-radius: 4px;
+    font-size: 1.6rem;
+    font-weight: 700;
+    padding: 14px 8px;
+}
+
+.borderPrimary {
+    border-color: var(--primary);
+}
+
+.bgPrimary {
+    background-color: var(--primary);
+    color: white;
+    &:hover {
+        background: linear-gradient(0deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.06)), rgb(254, 44, 85);
+    }
+}
+
+.noneStyleButton {
+    border: none;
+    justify-content: flex-start;
+    padding: 10px 8px 10px 15px;
+    font-weight: 500;
+    line-height: 21px;
+
+    .leftIcon {
+        width: 22px;
+    }
+}
+
+.noneChildren {
+    padding: 4px 8px;
+    border: none;
+    gap: 0;
+    font-size: 2.2rem;
+
+    &:hover {
+        background-color: transparent;
+    }
+}
+
+.switch-button-wrapper {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.switch-button {
+    font-size: 3rem;
+    color: rgba(47, 43, 43, 0.8);
+}
+
+.disable {
+    background-color: rgba(22, 24, 35, 0.06);
+    color: rgb(151, 152, 155);
+    cursor: not-allowed;
+    pointer-events: none;
+}
