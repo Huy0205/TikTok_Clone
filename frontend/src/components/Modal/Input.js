@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import classNames from 'classnames/bind';
 import styles from './Modal.module.scss';
 
@@ -31,5 +32,15 @@ function Input({
         </div>
     );
 }
+
+Input.propTypes = {
+    type: PropTypes.string.isRequired,
+    placeholder: PropTypes.string,
+    button: PropTypes.node,
+    borderButtonLeft: PropTypes.bool,
+    buttonDisable: PropTypes.bool,
+    passState: PropTypes.oneOfType([PropTypes.string, PropTypes.func]).isRequired,
+    onClick: PropTypes.func,
+};
 
 export default Input;

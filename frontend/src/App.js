@@ -1,7 +1,7 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { publicRoutes } from '~/routes';
-import { DefaultLayout } from '~/layout';
+import DefaultLayout from '~/layouts';
 import { UserServices } from '~/services';
 import { AuthContext } from '~/contexts/AuthContext';
 
@@ -22,6 +22,7 @@ function App() {
             setLoading(false);
         };
         fetchAccount();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     if (loading) return <div>Loading...</div>;

@@ -88,24 +88,6 @@
 .search-result {
     overflow-y: auto;
 
-    &::-webkit-scrollbar {
-        width: 8px;
-    }
-
-    &::-webkit-scrollbar-track {
-        border-radius: 12px;
-        background-color: transparent;
-    }
-
-    &::-webkit-scrollbar-thumb {
-        background: rgba(0, 0, 0, 0.06);
-        border-radius: 10px;
-
-        &:hover {
-            background: rgba(0, 0, 0, 0.08);
-        }
-    }
-
     .keyword-item {
         display: flex;
         align-items: center;

@@ -16,10 +16,10 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { faCircleQuestion, faKeyboard, faMessage, faPaperPlane, faUser } from '@fortawesome/free-regular-svg-icons';
 
-import { routesConfig } from '~/config';
-import images from '~/assets/images';
 import styles from './Header.module.scss';
-import Avatar from '~/components/Avatar';
+import config from '~/config';
+import images from '~/assets/images';
+import Image from '~/components/Image';
 import Button from '~/components/Button';
 import Menu from '~/components/Popper/Menu';
 import Modal from '~/components/Modal';
@@ -107,7 +107,7 @@ function Header() {
     return (
         <header className={cx('wrapper')}>
             <div className={cx('logo-wrapper')}>
-                <Link className={cx('logo-link')} to={routesConfig.home}>
+                <Link className={cx('logo-link')} to={config.routes.home}>
                     <img src={images.logo} alt="logo" />
                 </Link>
             </div>
@@ -122,15 +122,15 @@ function Header() {
                         </Button>
 
                         <Tippy content="Tin nhắn" placement="bottom">
-                            <div>
-                                <Button leftIcon={faPaperPlane} />
-                            </div>
+                            <Button buttonIcon>
+                                <FontAwesomeIcon icon={faPaperPlane} />
+                            </Button>
                         </Tippy>
 
                         <Tippy content="Hộp thư" placement="bottom">
-                            <div>
-                                <Button leftIcon={faMessage} />
-                            </div>
+                            <Button buttonIcon>
+                                <FontAwesomeIcon icon={faMessage} />
+                            </Button>
                         </Tippy>
                     </>
                 ) : (
@@ -141,9 +141,7 @@ function Header() {
 
                 <Menu items={isAuthenticated ? ITEMS_WITH_LOGIN : ITEMS_WITHOUT_LOGIN}>
                     {isAuthenticated ? (
-                        <div className={cx('avatar-wrapper')}>
-                            <Avatar src={user.avatar} alt="avatar" size={36} />
-                        </div>
+                        <Image src={user.avatar} alt="avatar" size={36} />
                     ) : (
                         <FontAwesomeIcon className={cx('more-icon')} icon={faEllipsisVertical} />
                     )}

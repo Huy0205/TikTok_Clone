@@ -9,7 +9,6 @@ import Button from '../Button';
 import { UserServices } from '~/services';
 import { AuthContext } from '~/contexts/AuthContext';
 import Input from './Input';
-import Action from './Action';
 
 const cx = classNames.bind(styles);
 
@@ -264,9 +263,15 @@ function Modal({ state }) {
                                             onClick={handleResendOtp}
                                         />
                                     </div>
-                                    <Action disable={!email || !password || !otp} onClick={handleVerifyOtp}>
+                                    <Button
+                                        size="large"
+                                        bgPrimary
+                                        disable={!email || !password || !otp}
+                                        className={cx('more-style-login-button')}
+                                        onClick={handleVerifyOtp}
+                                    >
                                         Tiếp
-                                    </Action>
+                                    </Button>
                                 </>
                             )}
 
@@ -283,9 +288,15 @@ function Modal({ state }) {
                                         />
                                         <div className={cx('forgot-password')}>Quên mật khẩu?</div>
                                     </div>
-                                    <Action disable={!email || !password} onClick={handleLogin}>
+                                    <Button
+                                        size="large"
+                                        bgPrimary
+                                        disable={!email || !password}
+                                        className={cx('more-style-login-button')}
+                                        onClick={handleLogin}
+                                    >
                                         Đăng nhập
-                                    </Action>
+                                    </Button>
                                 </>
                             )}
 
@@ -299,9 +310,15 @@ function Modal({ state }) {
                                             passState={[tiktokId, setTiktokId]}
                                         />
                                     </div>
-                                    <Action disable={!tiktokId} onClick={handleRegister}>
+                                    <Button
+                                        size="large"
+                                        bgPrimary
+                                        disable={!tiktokId}
+                                        className={cx('more-style-login-button')}
+                                        onClick={handleRegister}
+                                    >
                                         Đăng ký
-                                    </Action>
+                                    </Button>
                                 </>
                             )}
                         </div>

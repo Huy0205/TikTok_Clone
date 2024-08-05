@@ -7,6 +7,13 @@
     gap: 8px;
 }
 
+.medium,
+.large {
+    &:hover {
+        background-color: rgba(22, 24, 35, 0.03);
+    }
+}
+
 .medium {
     min-width: 36px;
     min-height: 36px;
@@ -14,15 +21,10 @@
     font-weight: 700;
     font-size: 1.6rem;
     line-height: 21px;
-
-    &:hover {
-        background-color: rgba(22, 24, 35, 0.03);
-    }
 }
 
 .large {
     width: 100%;
-    border-radius: 4px;
     font-size: 1.6rem;
     font-weight: 700;
     padding: 14px 8px;
@@ -52,7 +54,7 @@
     }
 }
 
-.noneChildren {
+.buttonIcon {
     padding: 4px 8px;
     border: none;
     gap: 0;
@@ -70,7 +72,7 @@
 }
 
 .switch-button {
-    font-size: 3rem;
+    font-size: 2.2rem;
     color: rgba(47, 43, 43, 0.8);
 }
 
