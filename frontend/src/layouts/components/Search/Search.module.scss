@@ -14,7 +14,8 @@
 
     input {
         flex: 1;
-        padding: 0 var(--padding-horizontal-input);
+        padding-left: var(--padding-horizontal-input);
+        padding-right: 40px;
         line-height: 21px;
         border: none;
         outline: none;
@@ -87,30 +88,6 @@
 
 .search-result {
     overflow-y: auto;
-
-    .keyword-item {
-        display: flex;
-        align-items: center;
-        padding: 10px 25px;
-        gap: 10px;
-
-        .icon-search-keyword {
-            font-size: 1.4rem;
-        }
-
-        .keyword-content {
-            font-size: 1.6rem;
-            line-height: 21px;
-            font-weight: 600;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-    }
-
-    .account-item {
-        padding: 0;
-    }
 
     .show-all-result {
         padding: 18px 16px;
