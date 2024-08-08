@@ -7,6 +7,7 @@
     --text-color: #333;
     --white: rgb(255, 255, 255);
     --header-height-default: 60px;
+    --width-sidebar-default: 240px;
 }
 
 * {
@@ -35,6 +36,7 @@ html {
 }
 
 body {
+    min-height: 100vh;
     font-family: 'Inter', sans-serif;
     font-size: 1.6rem;
     line-height: 1.5;

@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import classNames from 'classnames/bind';
 import styles from './AccountItem.module.scss';
-import Image from '../Image/Image';
+import Avatar from '../Avatar';
 
 const cx = classNames.bind(styles);
 
@@ -10,7 +10,7 @@ function AccountItem({ account }) {
 
     return (
         <div className={cx('wrapper')}>
-            <Image className={cx('avatar-custom')} src={avatar} alt={nickname} size={40} />
+            <Avatar className={cx('avatar-custom')} src={avatar} alt={nickname} size={40} />
             <div className={cx('info')}>
                 <h4 className={cx('tiktokId')}>{tiktokId}</h4>
                 <span className={cx('nickname')}>{nickname}</span>

@@ -48,10 +48,6 @@
     padding: 10px 8px 10px 15px;
     font-weight: 500;
     line-height: 21px;
-
-    .leftIcon {
-        width: 22px;
-    }
 }
 
 .buttonIcon {
@@ -81,4 +77,28 @@
     color: rgb(151, 152, 155);
     cursor: not-allowed;
     pointer-events: none;
+}
+
+.active {
+    color: var(--primary) !important;
+
+    .left-icon {
+        display: none;
+    }
+
+    .left-icon-active {
+        display: flex;
+    }
+}
+
+.left-icon {
+    display: flex;
+}
+
+.left-icon-active {
+    display: none;
+}
+
+.rounded {
+    border-radius: 50%;
 }

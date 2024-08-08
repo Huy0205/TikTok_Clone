@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import { useState, forwardRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import classNames from 'classnames/bind';
 import styles from './Button.module.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -13,6 +13,7 @@ const Button = forwardRef(
         {
             children,
             leftIcon,
+            leftIconActive,
             size = 'medium',
             rightIcon,
             href,
@@ -21,8 +22,10 @@ const Button = forwardRef(
             noneStyleButton = false,
             buttonIcon = false,
             bgPrimary = false,
+            rounded = false,
             disable = false,
             hasSwitchButton = false,
+            canActive = false,
             className,
             onClick,
             ...props
@@ -35,6 +38,9 @@ const Button = forwardRef(
         if (href) {
             props.href = href;
             Component = 'a';
+        } else if (canActive) {
+            props.to = to;
+            Component = NavLink;
         } else if (to) {
             props.to = to;
             Component = Link;
@@ -51,19 +57,23 @@ const Button = forwardRef(
                 disable,
                 noneStyleButton,
                 buttonIcon,
+                rounded,
             },
             className,
         );
+
+        const handleActive = (nav) => cx(classes, { active: nav?.isActive });
 
         const toggleThemes = () => {
             setDarkThemes(!darkThemes);
         };
 
         return (
-            <Component ref={ref} className={classes} onClick={onClick} {...props}>
-                {leftIcon && <FontAwesomeIcon className={cx('leftIcon')} icon={leftIcon} />}
+            <Component ref={ref} className={canActive ? handleActive : classes} onClick={onClick} {...props}>
+                {leftIcon && <span className={cx('left-icon')}>{leftIcon}</span>}
+                {leftIconActive && <span className={cx('left-icon-active')}>{leftIconActive}</span>}
                 {children}
-                {rightIcon && <FontAwesomeIcon icon={rightIcon} />}
+                {rightIcon && <span className={cx('rightIcon')}>{rightIcon}</span>}
                 {hasSwitchButton && (
                     <div className={cx('switch-button-wrapper')}>
                         <button className={cx('switch-button')} onClick={toggleThemes}>
@@ -79,6 +89,7 @@ const Button = forwardRef(
 Button.propTypes = {
     children: PropTypes.node.isRequired,
     leftIcon: PropTypes.node,
+    leftIconActive: PropTypes.node,
     size: PropTypes.oneOf(['small', 'medium', 'large']),
     rightIcon: PropTypes.node,
     href: PropTypes.string,
@@ -87,8 +98,10 @@ Button.propTypes = {
     noneStyleButton: PropTypes.bool,
     buttonIcon: PropTypes.bool,
     bgPrimary: PropTypes.bool,
+    rounded: PropTypes.bool,
     disable: PropTypes.bool,
     hasSwitchButton: PropTypes.bool,
+    canActive: PropTypes.bool,
     className: PropTypes.string,
     onClick: PropTypes.func,
 };

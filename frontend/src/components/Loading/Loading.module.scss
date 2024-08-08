@@ -1,0 +1,63 @@
+.wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #fff;
+}
+
+.loader {
+    position: relative;
+    width: 80px;
+    height: 40px;
+}
+
+.circle {
+    position: absolute;
+    top: 6px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    mix-blend-mode: multiply;
+    animation: move 1s linear infinite;
+}
+
+.red {
+    background-color: #ff0050;
+    animation-delay: 0.5s;
+}
+
+.blue {
+    background-color: #00f2ea;
+}
+
+@keyframes move {
+    0%,
+    100% {
+        top: 6px;
+        left: 0;
+        width: 28px;
+        height: 28px;
+        z-index: 0;
+    }
+    25% {
+        top: 0px;
+        left: 20px;
+        width: 40px;
+        height: 40px;
+        z-index: 1;
+    }
+    50% {
+        top: 6px;
+        left: 48px;
+        width: 28px;
+        height: 28px;
+    }
+    75% {
+        top: 8px;
+        left: 26px;
+        width: 28px;
+        height: 28px;
+    }
+}

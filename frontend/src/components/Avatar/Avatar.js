@@ -1,12 +1,12 @@
 import PropTypes from 'prop-types';
 import { forwardRef, useState } from 'react';
 import classNames from 'classnames/bind';
-import styles from './Image.module.scss';
+import styles from './Avatar.module.scss';
 import images from '~/assets/images';
 
 const cx = classNames.bind(styles);
 
-const Image = forwardRef(({ src, alt, size, customFallBack = images.error, className }, ref) => {
+const Avatar = forwardRef(({ src, alt, size, customFallBack = images.error, className }, ref) => {
     const [fallBack, setFallBack] = useState('');
 
     const handleError = () => {
@@ -34,4 +34,4 @@ Image.propTypes = {
     className: PropTypes.string,
 };
 
-export default Image;
+export default Avatar;

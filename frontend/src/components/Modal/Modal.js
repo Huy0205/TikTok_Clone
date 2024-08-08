@@ -9,13 +9,14 @@ import Button from '../Button/Button';
 import { UserServices } from '~/services';
 import { AuthContext } from '~/contexts/AuthContext';
 import Input from './Input';
+import { ModalContext } from '~/contexts';
 
 const cx = classNames.bind(styles);
 
 const currentYear = new Date().getFullYear();
 
-function Modal({ state }) {
-    const [showModal, setShowModal] = state;
+function Modal() {
+    const { showModal, closeModal } = useContext(ModalContext);
     const [screen, setScreen] = useState('login');
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState('');
@@ -33,6 +34,8 @@ function Modal({ state }) {
     const [loading, setLoading] = useState(false);
 
     const { setAuth } = useContext(AuthContext);
+
+    console.log('showModal', showModal);
 
     const classes = cx('container', {
         showModal,
@@ -80,7 +83,7 @@ function Modal({ state }) {
     };
 
     const handleCloseModal = () => {
-        setShowModal(false);
+        closeModal();
         changeForm('login');
     };
 
@@ -130,7 +133,8 @@ function Modal({ state }) {
                 isAuthenticated: true,
                 user: user,
             });
-            setShowModal(false);
+            closeModal();
+            window.location.reload();
         } else if (response?.status === 400) {
             alert('Mật khẩu không đúng');
         } else if (response?.status === 404) {

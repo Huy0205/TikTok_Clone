@@ -1,0 +1,241 @@
+.video-item-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    max-width: 692px;
+    padding: 20px 0px;
+
+    &.vertical {
+        height: calc(100vh - var(--header-height-default));
+    }
+
+    &.horizontal {
+        width: 592px;
+    }
+}
+
+.video-item-container {
+    --border-radius: 16px;
+    position: relative;
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+.video {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--border-radius);
+    object-fit: contain;
+}
+
+// VideoFooter
+.footer {
+    --color-text-footer: rgb(255, 255, 255);
+    --padding-footer: 12px;
+    --font-size-footer: 1.4rem;
+
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-height: 100%;
+}
+
+.link-container,
+.description-container {
+    padding: 0 var(--padding-footer);
+}
+
+.link-tiktokId {
+    margin-bottom: 10px;
+
+    span {
+        font-size: var(--font-size-footer);
+        font-weight: 500;
+        color: var(--color-text-footer);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &:hover span {
+        text-decoration: underline;
+    }
+}
+
+.description {
+    display: flex;
+    flex-direction: row;
+
+    &.more {
+        flex-direction: column;
+    }
+}
+
+.description-content {
+    font-size: var(--font-size-footer);
+    font-weight: 400;
+    color: var(--color-text-footer);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &.more {
+        white-space: normal;
+        overflow: visible;
+        text-overflow: unset;
+    }
+}
+
+.more-btn-container {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.more-btn {
+    padding: 5px 8px;
+    font-size: var(--font-size-footer);
+    font-weight: 400;
+    color: var(--color-text-footer);
+    cursor: pointer;
+}
+
+.music-info {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: var(--font-size-footer);
+    font-weight: 400;
+    color: var(--color-text-footer);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bottom {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0 5px 12px;
+}
+
+.progress-wrapper {
+    flex: 1;
+    padding: 4px 0;
+    margin: 0 10px;
+
+    &:hover .progress-container {
+        height: 4px;
+    }
+
+    &:hover .circle {
+        display: block;
+    }
+}
+
+.progress-container {
+    position: relative;
+    height: 2px;
+    background-color: black;
+    cursor: pointer;
+
+    .circle {
+        top: 50%;
+        transform: translate(-50%, -50%);
+        display: none;
+    }
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: var(--color-text-footer);
+}
+
+.circle {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--color-text-footer);
+}
+
+.play-btn,
+.volume-btn,
+.floating-player-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    font-size: 1.8rem;
+    font-weight: 500;
+    color: var(--color-text-footer);
+}
+
+.volume-container {
+    position: relative;
+
+    &.hoverVideo {
+        position: absolute;
+        bottom: calc(var(--padding-footer) - 5px);
+        right: 5px;
+    }
+}
+
+.volume-slider-wrapper {
+    position: absolute;
+    bottom: calc(100%);
+    left: 50%;
+    height: 48px;
+    transform: translateX(-50%);
+    padding: 0 6px;
+    display: none;
+}
+
+.volume-slider {
+    position: relative;
+    width: 2px;
+    height: 100%;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.34);
+    cursor: pointer;
+
+    .circle {
+        right: 50%;
+        transform: translate(50%, 50%);
+    }
+
+    .slider-bar {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        background-color: var(--color-text-footer);
+    }
+}
+
+.volume-container:hover .volume-slider-wrapper,
+.volume-slider .circle {
+    display: block;
+}
+
+// VideoSidebar
+.sibar {
+    display: flex;
+    flex-direction: column;
+    margin-left: 20px;
+}
+
+.icon-btn-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    margin-top: 8px;
+    margin-bottom: 6px;
+    background-color: rgba(22, 24, 35, 0.06);
+    transition: all 200ms ease-in-out 0s;
+}

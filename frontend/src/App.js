@@ -4,6 +4,7 @@ import { publicRoutes } from '~/routes/routes';
 import DefaultLayout from '~/layouts';
 import { UserServices } from '~/services';
 import { AuthContext } from '~/contexts/AuthContext';
+import Loading from './components/Loading';
 
 function App() {
     const [loading, setLoading] = useState(false);
@@ -25,7 +26,7 @@ function App() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) return <Loading />;
 
     return (
         <Router>

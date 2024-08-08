@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import classNames from 'classnames/bind';
 import Tippy from '@tippyjs/react';
@@ -19,22 +19,22 @@ import { faCircleQuestion, faKeyboard, faMessage, faPaperPlane, faUser } from '@
 import styles from './Header.module.scss';
 import config from '~/config';
 import images from '~/assets/images';
-import Image from '~/components/Image';
+import Image from '~/components/Avatar';
 import Button from '~/components/Button';
 import Menu from '~/components/Popper/Menu';
-import Modal from '~/components/Modal';
 import { AuthContext } from '~/contexts/AuthContext';
 import Search from '../Search/Search';
+import { ModalContext } from '~/contexts';
 
 const cx = classNames.bind(styles);
 
 const ITEMS_WITHOUT_LOGIN = [
     {
-        icon: faLightbulb,
+        icon: <FontAwesomeIcon icon={faLightbulb} />,
         title: 'Trung tâm nhà sáng tạo LIVE',
     },
     {
-        icon: faLanguage,
+        icon: <FontAwesomeIcon icon={faLanguage} />,
         title: 'Tiếng Việt',
         children: {
             title: 'Ngôn ngữ',
@@ -56,15 +56,15 @@ const ITEMS_WITHOUT_LOGIN = [
         },
     },
     {
-        icon: faCircleQuestion,
+        icon: <FontAwesomeIcon icon={faCircleQuestion} />,
         title: 'Phản hồi và trợ giúp',
     },
     {
-        icon: faKeyboard,
+        icon: <FontAwesomeIcon icon={faKeyboard} />,
         title: 'Phím tắt trên bàn phím',
     },
     {
-        icon: faMoon,
+        icon: <FontAwesomeIcon icon={faMoon} />,
         title: 'Chế độ tối',
         hasSwitchButton: true,
     },
@@ -74,21 +74,21 @@ const [head, ...tail] = ITEMS_WITHOUT_LOGIN;
 
 const ITEMS_WITH_LOGIN = [
     {
-        icon: faUser,
+        icon: <FontAwesomeIcon icon={faUser} />,
         title: 'Xem hồ sơ',
     },
     {
-        icon: faCoins,
+        icon: <FontAwesomeIcon icon={faCoins} />,
         title: 'Nhận xu',
     },
     head,
     {
-        icon: faGear,
+        icon: <FontAwesomeIcon icon={faGear} />,
         title: 'Cài đặt',
     },
     ...tail,
     {
-        icon: faArrowRightFromBracket,
+        icon: <FontAwesomeIcon icon={faArrowRightFromBracket} />,
         title: 'Đăng xuất',
         hasTopLine: true,
         onClick() {
@@ -99,13 +99,18 @@ const ITEMS_WITH_LOGIN = [
 ];
 
 function Header() {
-    const [showModal, setShowModal] = useState(false);
-
+    const { openModal } = useContext(ModalContext);
     const { auth } = useContext(AuthContext);
     const { isAuthenticated, user } = auth;
 
+    const headerRef = useRef();
+
+    const handleClickLogin = () => {
+        openModal();
+    };
+
     return (
-        <header className={cx('wrapper')}>
+        <header ref={headerRef} className={cx('wrapper')}>
             <div className={cx('logo-wrapper')}>
                 <Link className={cx('logo-link')} to={config.routes.home}>
                     <img src={images.logo} alt="logo" />
@@ -117,7 +122,11 @@ function Header() {
             <div className={cx('action')}>
                 {isAuthenticated ? (
                     <>
-                        <Button className={cx('upload-button-custom')} leftIcon={faPlus} size="medium">
+                        <Button
+                            className={cx('upload-button-custom')}
+                            leftIcon={<FontAwesomeIcon icon={faPlus} />}
+                            size="medium"
+                        >
                             Tải lên
                         </Button>
 
@@ -134,7 +143,7 @@ function Header() {
                         </Tippy>
                     </>
                 ) : (
-                    <Button borderPrimary bgPrimary onClick={() => setShowModal(true)}>
+                    <Button borderPrimary bgPrimary onClick={handleClickLogin}>
                         Đăng nhập
                     </Button>
                 )}
@@ -146,7 +155,6 @@ function Header() {
                         <FontAwesomeIcon className={cx('more-icon')} icon={faEllipsisVertical} />
                     )}
                 </Menu>
-                <Modal state={[showModal, setShowModal]} />
             </div>
         </header>
     );
