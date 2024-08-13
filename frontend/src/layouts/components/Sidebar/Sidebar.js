@@ -42,6 +42,14 @@ function Sidebar() {
                     />
                     <h4 className={cx('create-animation-btn-text')}>Tạo hiệu ứng TikTok, nhận phần thưởng</h4>
                 </a>
+                <a
+                    className={cx('create-animation-btn-responsive-wrapper')}
+                    href="https://effecthouse.tiktok.com/download?utm_campaign=ttweb_entrance_v1&utm_source=tiktok_webapp_main"
+                    target="_blank"
+                    rel="noreferrer"
+                >
+                    <div className={cx('create-animation-btn-responsive')}></div>
+                </a>
                 <h4 className={cx('text-info')}>Công ty</h4>
                 <h4 className={cx('text-info')}>Chương trình</h4>
                 <h4 className={cx('text-info')}>Điều khoản và chính sách</h4>

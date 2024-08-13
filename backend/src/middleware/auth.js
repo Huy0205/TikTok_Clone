@@ -9,6 +9,7 @@ const auth = (req, res, next) => {
     "/user/search",
     "/keyword/inscrease-keyword-count",
     "/keyword/search",
+    "/video/recomended",
   ];
   if (whiteList.includes(req.path)) {
     return next();
@@ -23,12 +24,14 @@ const auth = (req, res, next) => {
     } catch (error) {
       return res.status(401).json({
         status: 401,
+        code: "TOKEN_EXPIRED",
         message: "Token is expired",
       });
     }
   }
   return res.status(401).json({
     status: 401,
+    code: "UNAUTHORIZED",
     message: "Unauthorized",
   });
 };

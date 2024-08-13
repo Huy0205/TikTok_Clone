@@ -4,13 +4,7 @@
     width: var(--width-sidebar-default);
     height: calc(100vh - var(--header-height-default));
     padding: 20px 8px 26px 8px;
-
-    overflow-y: hidden;
-
-    &:hover {
-        overflow-y: auto;
-        padding-right: 0;
-    }
+    overflow-y: auto;
 }
 
 .login-wrapper {
@@ -39,6 +33,21 @@
 
 .create-animation-btn {
     position: relative;
+}
+
+.create-animation-btn-responsive-wrapper {
+    display: none;
+}
+
+.create-animation-btn-responsive {
+    width: 32px;
+    height: 32px;
+    background-size: cover;
+    background-image: url('../../../assets/images/create-animation-responsive.png');
+
+    &:hover {
+        background-image: url('../../../assets/images/create-animation-responsive-hover.png');
+    }
 }
 
 .create-animation-btn-bg {
@@ -83,4 +92,26 @@
     font-size: 12px;
     font-weight: 600;
     color: rgba(22, 24, 35, 0.5);
+}
+
+@media screen and (max-width: 1071px) {
+    .wrapper {
+        padding: 0px 8px;
+        width: var(--width-sidebar-collapsed);
+        flex: 0 0 72px;
+        box-shadow: rgba(0, 0, 0, 0.06) 0px 2px 8px;
+        border-right: 1px solid rgba(22, 24, 35, 0.12);
+    }
+
+    .login-wrapper,
+    .text-info,
+    .text-more,
+    .copy-right,
+    .create-animation-btn {
+        display: none;
+    }
+
+    .create-animation-btn-responsive-wrapper {
+        display: block;
+    }
 }

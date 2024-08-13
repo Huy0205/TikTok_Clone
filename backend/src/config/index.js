@@ -1,5 +1,7 @@
-const db = require("./db");
+const mongoDB = require("./mongoDB");
+const redis = require("./redis");
 
 module.exports = {
-  db,
+  mongoDB,
+  redis,
 };

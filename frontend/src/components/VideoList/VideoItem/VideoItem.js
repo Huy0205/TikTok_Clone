@@ -1,17 +1,21 @@
+import { useContext, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames/bind';
 
 import styles from './VideoItem.module.scss';
-import { useEffect, useRef, useState } from 'react';
 import VideoSibar from './VideoSidebar';
 import VideoFooter from './VideoFooter';
+import { VideoContext } from '~/contexts/VideoContext';
 
 const cx = classNames.bind(styles);
 
 function VideoItem({ data }) {
-    const videoRef = useRef();
     const [classes, setClasses] = useState(cx('video-item-wrapper'));
     const [hover, setHover] = useState(false);
+
+    const { isMuted } = useContext(VideoContext);
+
+    const videoRef = useRef();
 
     useEffect(() => {
         const handleLoadedMetadata = () => {
@@ -25,44 +29,50 @@ function VideoItem({ data }) {
         };
 
         const handlePlay = () => {
-            if (videoRef.current && isVideoInViewport(videoRef.current, 1 / 2)) {
+            if (videoRef.current) {
                 videoRef.current
                     .play()
                     .then(() => console.log('playing'))
                     .catch(() => console.log('error'));
-            } else {
+            }
+        };
+
+        const handlePause = () => {
+            if (videoRef.current) {
                 videoRef.current.pause();
             }
         };
 
-        const handleScroll = () => {
-            if (videoRef.current) {
-                handlePlay();
-            }
-        };
-
-        const isVideoInViewport = (video, threshold) => {
-            const rect = video.getBoundingClientRect();
-            return (
-                rect.top >= 0 &&
-                rect.left >= 0 &&
-                rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) * (1 + threshold) &&
-                rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-            );
-        };
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        handlePlay();
+                    } else {
+                        handlePause();
+                        if (videoRef.current) {
+                            videoRef.current.currentTime = 0;
+                        }
+                    }
+                });
+            },
+            {
+                rootMargin: '-160px 0px -160px 0px',
+                threshold: 0.5,
+            },
+        );
 
         const videoElement = videoRef.current;
         if (videoElement) {
             videoElement.addEventListener('loadedmetadata', handleLoadedMetadata);
-            window.addEventListener('scroll', handleScroll);
-            handlePlay();
+            observer.observe(videoElement);
         }
 
         return () => {
             if (videoElement) {
                 videoElement.removeEventListener('loadedmetadata', handleLoadedMetadata);
+                observer.unobserve(videoElement);
             }
-            window.removeEventListener('scroll', handleScroll);
         };
     }, [videoRef]);
 
@@ -73,7 +83,15 @@ function VideoItem({ data }) {
                 onMouseEnter={() => setHover(true)}
                 onMouseLeave={() => setHover(false)}
             >
-                <video ref={videoRef} className={cx('video')} src={data.src} muted loop preload="auto" playsInline />
+                <video
+                    ref={videoRef}
+                    className={cx('video')}
+                    src={data.src}
+                    muted={isMuted}
+                    loop
+                    preload="auto"
+                    playsInline
+                />
                 <VideoFooter videoRef={videoRef} hoverVideo={hover} />
             </div>
             <VideoSibar />

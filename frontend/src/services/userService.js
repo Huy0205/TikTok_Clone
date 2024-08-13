@@ -30,9 +30,9 @@ export const verifyOTP = async (email, otp) => {
     }
 };
 
-export const register = async (email, password, tiktokId, birthdate) => {
+export const register = async (formData) => {
     try {
-        const res = await axios.post('/user/register', { email, password, tiktokId, birthdate });
+        const res = await axios.post('/user/register', { formData });
         return res;
     } catch (error) {
         console.error(error);
@@ -40,9 +40,9 @@ export const register = async (email, password, tiktokId, birthdate) => {
     }
 };
 
-export const login = async (email, password) => {
+export const login = async (formData) => {
     try {
-        const res = await axios.post('/user/login', { email, password });
+        const res = await axios.post('/user/login', { formData });
         return res;
     } catch (error) {
         console.error(error);

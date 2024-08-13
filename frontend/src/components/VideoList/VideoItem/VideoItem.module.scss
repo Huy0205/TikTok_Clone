@@ -104,10 +104,27 @@
 .music-info {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 4px;
+    margin-right: 45px;
+
+    &.hoverVideo {
+        margin-right: 0;
+    }
+}
+
+.music-icon,
+.music-name {
     font-size: var(--font-size-footer);
     font-weight: 400;
+    line-height: 21px;
     color: var(--color-text-footer);
+}
+
+.music-icon {
+    display: flex;
+}
+
+.music-name {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -174,12 +191,13 @@
 }
 
 .volume-container {
-    position: relative;
+    position: absolute;
+    bottom: calc(var(--padding-footer) - 5px);
+    right: 5px;
 
     &.hoverVideo {
-        position: absolute;
-        bottom: calc(var(--padding-footer) - 5px);
-        right: 5px;
+        position: relative;
+        bottom: 0;
     }
 }
 

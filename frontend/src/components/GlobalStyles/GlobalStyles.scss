@@ -8,6 +8,7 @@
     --white: rgb(255, 255, 255);
     --header-height-default: 60px;
     --width-sidebar-default: 240px;
+    --width-sidebar-collapsed: 72px;
 }
 
 * {
@@ -26,7 +27,11 @@ html {
 
     *::-webkit-scrollbar-thumb {
         border-radius: 4px;
-        background-color: rgba(22, 24, 35, 0.06);
+        background: transparent;
+    }
+
+    *:hover::-webkit-scrollbar-thumb {
+        background: rgba(22, 24, 35, 0.06);
     }
 
     *::-webkit-scrollbar-track {

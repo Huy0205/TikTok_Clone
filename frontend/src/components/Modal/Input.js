@@ -7,22 +7,27 @@ const cx = classNames.bind(styles);
 function Input({
     type,
     placeholder,
+    value,
     button,
     borderButtonLeft = false,
     buttonDisable = false,
-    passState = [],
+    onBlur,
+    onFocus,
+    onChange,
     onClick,
+    className,
 }) {
-    const [inputState, setInputState] = passState;
     const classes = cx('button-right', { borderButtonLeft, buttonDisable });
     return (
-        <div className={cx('input-item')}>
+        <div className={cx('input-item', className)}>
             <input
                 type={type}
                 className={cx('textfile')}
                 placeholder={placeholder}
-                value={inputState}
-                onChange={(e) => setInputState(e.target.value)}
+                value={value}
+                onFocus={onFocus}
+                onChange={onChange}
+                onBlur={onBlur}
             />
             {button && (
                 <button className={classes} onClick={onClick}>
@@ -39,7 +44,9 @@ Input.propTypes = {
     button: PropTypes.node,
     borderButtonLeft: PropTypes.bool,
     buttonDisable: PropTypes.bool,
-    passState: PropTypes.oneOfType([PropTypes.string, PropTypes.func]).isRequired,
+    onBlur: PropTypes.func,
+    onFocus: PropTypes.func,
+    onChange: PropTypes.func,
     onClick: PropTypes.func,
 };
 

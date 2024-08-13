@@ -9,9 +9,9 @@ import { useDebounce } from '~/hooks';
 import { KeywordServices, UserServices } from '~/services';
 import { Wrapper as PopperWrapper } from '~/components/Popper';
 import Button from '~/components/Button';
-import { AuthContext } from '~/contexts/AuthContext';
 import KeywordSearchResult from './SearchResult/keywords';
 import { AccountSearchResult } from './SearchResult';
+import { AuthContext } from '~/contexts';
 
 const cx = classNames.bind(styles);
 
@@ -22,9 +22,9 @@ function Search() {
     const [loading, setLoading] = useState(false);
     const [clickOutside, setClickOutside] = useState(false);
 
-    const debouncedValue = useDebounce(keyword, 500);
-
     const { auth } = useContext(AuthContext);
+
+    const debouncedValue = useDebounce(keyword, 500);
 
     useEffect(() => {
         if (debouncedValue.trim()) {
@@ -36,16 +36,16 @@ function Search() {
                         UserServices.search(auth.user.tiktokId, debouncedValue, 1, 5),
                     ]);
 
-                    if (keywordsRes?.data) {
+                    if (keywordsRes.code === 'SEARCH_SUCCESSFULLY') {
                         setKeywords(keywordsRes.data);
                     } else {
-                        throw new Error('Lỗi server khi tìm kiếm từ khóa');
+                        throw new Error(keywordsRes.message);
                     }
 
-                    if (accountsRes?.data) {
+                    if (accountsRes.code === 'SEARCH_SUCCESSFULLY') {
                         setAccounts(accountsRes.data);
                     } else {
-                        throw new Error('Lỗi server khi tìm kiếm tài khoản');
+                        throw new Error(accountsRes.message);
                     }
                 } catch (error) {
                     console.log(error);
@@ -84,7 +84,7 @@ function Search() {
                 interactive
                 visible={(accounts.length > 0 || keywords.length > 0) && !clickOutside}
                 render={(attrs) => (
-                    <div className={cx('search-result-wrapper')} tabIndex="-1" {...attrs}>
+                    <div className={cx('search-result-container')} tabIndex="-1" {...attrs}>
                         <PopperWrapper className={cx('search-result')}>
                             <KeywordSearchResult keywords={keywords} />
                             {accounts.length > 0 && <span className={cx('search-title')}>Tài khoản</span>}

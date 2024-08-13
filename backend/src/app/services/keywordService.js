@@ -52,12 +52,14 @@ const search = async (keyword) => {
     ]).exec();
     return {
       status: 200,
+      code: "SEARCH_SUCCESSFULLY",
       data: keywordInstance,
     };
   } catch (error) {
     console.log(error);
     return {
       status: 500,
+      code: "INTERNAL_SERVER_ERROR",
       message: "Internal server error",
     };
   }

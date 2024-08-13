@@ -1,5 +1,7 @@
 const nodeMailer = require("nodemailer");
-const redisClient = require("../../config/redis");
+const {
+  redis: { redisClient },
+} = require("../../config");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { User } = require("../models");
@@ -10,6 +12,7 @@ const getUserByTiktokId = async (tiktokId) => {
     if (!user) {
       return {
         status: 404,
+        code: "USER_NOT_FOUND",
         message: "User not found",
       };
     }
@@ -26,6 +29,7 @@ const getUserByTiktokId = async (tiktokId) => {
   } catch (error) {
     return {
       status: 500,
+      code: "INTERNAL_SERVER_ERROR",
       message: "Internal server error",
     };
   }
@@ -37,7 +41,8 @@ const sendOTPByMail = async (email) => {
     if (user) {
       return {
         status: 400,
-        message: "Email is exist",
+        code: "EMAIL_ALREADY_EXISTS",
+        message: "This email is already associated with an account.",
       };
     }
 
@@ -65,15 +70,18 @@ const sendOTPByMail = async (email) => {
     };
 
     await transporter.sendMail(mailOptions);
-    redisClient.set(email, otp, "EX", 60 * 60 * 48);
+    await redisClient.set(email, otp, "EX", 60 * 60 * 48);
     return {
       status: 200,
+      code: "OTP_SENT_SUCCESSFULLY",
       message: "OTP sent successfully",
     };
   } catch (error) {
+    console.log(error);
     return {
       status: 500,
-      message: "OTP sent failed",
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Internal server error",
     };
   }
 };
@@ -84,23 +92,28 @@ const verifyOTP = async (email, otp) => {
     if (otpInRedis === otp) {
       return {
         status: 200,
+        code: "OTP_IS_CORRECT",
         message: "OTP is correct",
       };
     }
     if (!otpInRedis) {
       return {
         status: 404,
+        code: "OTP_IS_EXPIRED",
         message: "OTP is expired",
       };
     }
     return {
       status: 400,
+      code: "OTP_IS_INCORRECT",
       message: "OTP is incorrect",
     };
   } catch (error) {
+    console.log(error);
     return {
       status: 500,
-      message: "Verify OTP failed",
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Internal server error",
     };
   }
 };
@@ -111,12 +124,13 @@ const register = async (email, password, tiktokId, birthdate) => {
     if (userCheck) {
       return {
         status: 400,
+        code: "TIKTOKID_IS_EXIST",
         message: "TiktokId is exist",
       };
     }
 
     const hashPassword = await bcrypt.hash(password, 10);
-    const result = await User.create({
+    await User.create({
       tiktokId,
       nickname: tiktokId,
       email,
@@ -124,16 +138,18 @@ const register = async (email, password, tiktokId, birthdate) => {
       birthdate,
       avatar: process.env.DEFAULT_AVATAR,
     });
-    console.log(">>>>>>>>>>.", result);
 
     return {
       status: 200,
+      code: "REGISTER_SUCCESSFULLY",
       message: "Register successfully",
     };
   } catch (error) {
+    console.log(error);
     return {
       status: 500,
-      message: "Register failed",
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Internal server error",
     };
   }
 };
@@ -144,6 +160,7 @@ const login = async (email, password) => {
     if (!user) {
       return {
         status: 404,
+        code: "EMAIL_NOT_EXIST",
         message: "Email not exist",
       };
     }
@@ -151,6 +168,7 @@ const login = async (email, password) => {
     if (!isMatchPassword) {
       return {
         status: 400,
+        code: "PASSWORD_INCORRECT",
         message: "Password is incorrect",
       };
     }
@@ -166,6 +184,7 @@ const login = async (email, password) => {
     );
     return {
       status: 200,
+      code: "LOGIN_SUCCESSFULLY",
       message: "Login successfully",
       data: {
         token,
@@ -179,9 +198,11 @@ const login = async (email, password) => {
       },
     };
   } catch (error) {
+    console.log(error);
     return {
       status: 500,
-      message: "Login failed",
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Internal server error",
     };
   }
 };
@@ -213,12 +234,14 @@ const search = async (currentTiktokId, keyword, page, limit) => {
 
     return {
       status: 200,
+      code: "SEARCH_SUCCESSFULLY",
       data: users,
     };
   } catch (error) {
     console.log(error);
     return {
       status: 500,
+      code: "INTERNAL_SERVER_ERROR",
       message: "Internal server error",
     };
   }

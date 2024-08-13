@@ -1,4 +1,4 @@
-const { default: axios } = require('~/util/axios.customize');
+import axios from '~/util/axios.customize';
 
 export const inscreaseKeywordCount = async (keyword) => {
     try {

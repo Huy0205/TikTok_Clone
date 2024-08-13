@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import classNames from 'classnames/bind';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircleNotch, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faCircleNotch, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { faEye, faEyeSlash } from '@fortawesome/free-regular-svg-icons';
 
 import styles from './Modal.module.scss';
@@ -19,40 +19,42 @@ function Modal() {
     const { showModal, closeModal } = useContext(ModalContext);
     const [screen, setScreen] = useState('login');
     const [showPassword, setShowPassword] = useState(false);
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [tiktokId, setTiktokId] = useState('');
-    const [birthDate, setBirthDate] = useState({
-        day: '',
-        month: '',
-        year: '',
-    });
     const [days, setDays] = useState([...Array(31).keys()]);
-    const [otp, setOtp] = useState('');
+    const [otpValue, setOtpValue] = useState('');
+    const [formData, setFormData] = useState({});
     const [timer, setTimer] = useState(0);
     const [selectAtived, setSelectAtived] = useState();
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState({});
 
     const { setAuth } = useContext(AuthContext);
-
-    console.log('showModal', showModal);
 
     const classes = cx('container', {
         showModal,
     });
 
     useEffect(() => {
-        const { month, year } = birthDate;
-        if (month) {
-            const dayInMonth = new Date(year || currentYear, month, 0).getDate();
-            setDays([...Array(dayInMonth).keys()]);
+        if (formData.birthdate) {
+            const { day, month, year } = formData.birthdate;
+            if (month) {
+                const dayInMonth = new Date(year || currentYear, month, 0).getDate();
+                setDays([...Array(dayInMonth).keys()]);
+
+                setError((prevError) => {
+                    if (day > dayInMonth) {
+                        return { ...prevError, birthdate: 'Vui lòng chọn ngày sinh hợp lệ!' };
+                    } else {
+                        return { ...prevError, birthdate: '' };
+                    }
+                });
+            }
         }
-    }, [birthDate]);
+    }, [formData.birthdate]);
 
     useEffect(() => {
         if (timer > 0) {
             const interval = setInterval(() => {
-                setTimer(timer - 1);
+                setTimer((prevTimer) => prevTimer - 1);
             }, 1000);
             return () => clearInterval(interval);
         }
@@ -71,15 +73,80 @@ function Modal() {
         if (form === 'inputTiktokId') {
             return;
         }
-        setEmail('');
-        setPassword('');
-        setOtp('');
-        setTiktokId('');
-        setBirthDate({
-            day: '',
-            month: '',
-            year: '',
-        });
+        setFormData({});
+        setError({});
+    };
+
+    const handleChangeData = (field, value) => {
+        if (field.includes('.')) {
+            const [mainField, subField] = field.split('.');
+            setFormData({
+                ...formData,
+                [mainField]: {
+                    ...formData[mainField],
+                    [subField]: value,
+                },
+            });
+        } else {
+            setFormData({ ...formData, [field]: value });
+        }
+    };
+
+    const validData = (field, value) => {
+        let newError = { ...error };
+
+        if (field === 'email') {
+            const { email } = formData;
+            const check = value || email;
+            if (!check) {
+                newError.email = 'Vui lòng nhập email';
+            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(check)) {
+                newError.email = 'Email không hợp lệ';
+            } else {
+                newError.email = '';
+            }
+        } else if (field === 'password') {
+            const { password } = formData;
+            const check = value || password;
+            const lengthError = check.length < 8 || check.length > 20;
+            const regex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>_\-+=[\]/`~';]).*$/;
+            const characterError = !regex.test(check);
+
+            newError.password = {
+                length: lengthError,
+                character: characterError,
+            };
+        } else if (field === 'otp') {
+            if (!otpValue) {
+                newError.otp = 'Vui lòng nhập mã OTP';
+            } else if (otpValue.length !== 6) {
+                newError.otp = 'Nhập mã gồm 6 chữ số';
+            } else if (!/^\d+$/.test(otpValue)) {
+                newError.otp = 'Mã OTP chỉ chứa số';
+            } else {
+                newError.otp = '';
+            }
+        } else if (field === 'tiktokId') {
+            const { tiktokId } = formData;
+            if (!tiktokId) {
+                newError.tiktokId = 'Vui lòng nhập TikTok ID';
+            } else {
+                const regex = /^(?=.{6,24}$)(?!.*\.\.)(?!^\.)(?!.*\.$)[a-zA-Z0-9_]+(\.[a-zA-Z0-9_]+)*$/;
+                if (!regex.test(tiktokId)) {
+                    newError.tiktokId =
+                        'TikTok ID chỉ bao gồm chữ cái, số, dấu chấm và dấu gạch dưới; dấu chấm không được đứng đầu hoặc cuối, không được có 2 dấu chấm liên tiếp và phải dài từ 6 đến 24 ký tự';
+                } else {
+                    newError.tiktokId = '';
+                }
+            }
+        }
+        setError(newError);
+    };
+
+    const handleCheckPassword = (e) => {
+        const value = e.target.value;
+        handleChangeData('password', value);
+        validData('password', value);
     };
 
     const handleCloseModal = () => {
@@ -87,46 +154,73 @@ function Modal() {
         changeForm('login');
     };
 
-    const handleResendOtp = async () => {
-        setLoading(true);
-        const res = await UserServices.sendOTPByMail(email);
-        if (res?.status === 200) {
-            setLoading(false);
-            setTimer(60);
-        } else if (res?.status === 400) {
-            alert('Email đa đươc đăng ký trước đó');
-        } else if (res?.status === 500) {
-            alert('Có lỗi xảy ra, vui lòng thử lại sau');
+    const handleSendOtp = async () => {
+        if (error.email) {
+            return;
         }
+        setLoading(true);
+        const response = await UserServices.sendOTPByMail(formData.email);
+        if (response.code === 'EMAIL_ALREADY_EXISTS') {
+            setError({ ...error, email: 'Email này đã được liên kết với một tài khoản khác!' });
+        } else if (response.code === 'OTP_SENT_SUCCESSFULLY') {
+            setTimer(60);
+        } else {
+            alert('Có lỗi xảy ra, vui lòng thử lại sau!');
+        }
+        setLoading(false);
     };
 
     const handleVerifyOtp = async () => {
-        const res = await UserServices.verifyOTP(email, otp);
-        if (res?.status === 200) {
+        if (formData.birthdate) {
+            const { day, month, year } = formData.birthdate;
+            if (!day || !month || !year) {
+                setError({ ...error, birthdate: 'Chưa chọn đủ ngày sinh!' });
+                return;
+            }
+        } else {
+            setError({ ...error, birthdate: 'Vui lòng chọn ngày sinh!' });
+            return;
+        }
+        const { birthdate, password, otp } = error;
+        if (birthdate || password.lengthError || password.characterError || otp) {
+            return;
+        }
+
+        const response = await UserServices.verifyOTP(formData.email, otpValue);
+        if (response.code === 'OTP_IS_CORRECT') {
             changeForm('inputTiktokId');
-        } else if (res?.status === 400) {
-            alert('Mã OTP không đúng');
-        } else if (res?.status === 404) {
-            alert('Mã OTP đã hết hạn');
-        } else if (res?.status === 500) {
-            alert('Có lỗi xảy ra, vui lòng thử lại sau');
+        } else if (response.code === 'OTP_IS_EXPIRED') {
+            setError({ ...error, otp: 'Mã OTP đã hết hạn, vui lòng gửi lại mã mới!' });
+        } else if (response.code === 'OTP_IS_INCORRECT') {
+            setError({ ...error, otp: 'Mã OTP không chính xác!' });
+        } else {
+            alert('Có lỗi xảy ra, vui lòng thử lại sau!');
         }
     };
 
     const handleRegister = async () => {
-        const response = await UserServices.register(email, password, tiktokId, birthDate);
-        if (response?.status === 200) {
+        console.log(formData);
+        if (error.tiktokId) {
+            return;
+        }
+        const response = await UserServices.register(formData);
+        if (response.code === 'TIKTOKID_IS_EXIST') {
+            setError({ ...error, tiktokId: 'TikTok ID này đã tồn tại!' });
+        } else if (response.code === 'REGISTER_SUCCESSFULLY') {
+            alert('Đăng ký thành công!');
             changeForm('login');
-        } else if (response?.status === 400) {
-            alert('TiKtok ID đã tồn tại');
-        } else if (response?.status === 500) {
-            alert('Có lỗi xảy ra, vui lòng thử lại sau');
+        } else {
+            alert('Có lỗi xảy ra, vui lòng thử lại sau!');
         }
     };
 
     const handleLogin = async () => {
-        const response = await UserServices.login(email, password);
-        if (response?.data) {
+        const response = await UserServices.login(formData);
+        if (response.code === 'EMAIL_NOT_EXIST') {
+            setError({ ...error, email: 'Email không tồn tại!' });
+        } else if (response.code === 'PASSWORD_INCORRECT') {
+            setError({ ...error, password: 'Mật khẩu không đúng!' });
+        } else if (response.code === 'LOGIN_SUCCESSFULLY') {
             const { token, user } = response.data;
             localStorage.setItem('access_token', token);
             setAuth({
@@ -135,12 +229,9 @@ function Modal() {
             });
             closeModal();
             window.location.reload();
-        } else if (response?.status === 400) {
-            alert('Mật khẩu không đúng');
-        } else if (response?.status === 404) {
-            alert('Email không tồn tại');
-        } else if (response?.status === 500) {
-            alert('Có lỗi xảy ra, vui lòng thử lại sau');
+        } else {
+            alert('Có lỗi xảy ra, vui lòng thử lại sau!');
+            window.location.reload();
         }
     };
 
@@ -170,10 +261,10 @@ function Modal() {
                                                     })}
                                                     name="month"
                                                     id="month"
-                                                    value={birthDate.month}
+                                                    value={formData.birthdate?.month}
                                                     onClick={() => handelSelectClick('month')}
                                                     onChange={(e) =>
-                                                        setBirthDate({ ...birthDate, month: e.target.value })
+                                                        handleChangeData('birthdate.month', e.target.value)
                                                     }
                                                 >
                                                     <option value="">Tháng</option>
@@ -191,11 +282,9 @@ function Modal() {
                                                     })}
                                                     name="day"
                                                     id="day"
-                                                    value={birthDate.day}
+                                                    value={formData.birthdate?.day}
                                                     onClick={() => handelSelectClick('day')}
-                                                    onChange={(e) =>
-                                                        setBirthDate({ ...birthDate, day: e.target.value })
-                                                    }
+                                                    onChange={(e) => handleChangeData('birthdate.day', e.target.value)}
                                                 >
                                                     <option value="">Ngày</option>
                                                     {days.map((day) => (
@@ -212,11 +301,9 @@ function Modal() {
                                                     })}
                                                     name="year"
                                                     id="year"
-                                                    value={birthDate.year}
+                                                    value={formData.birthdate?.year}
                                                     onClick={() => handelSelectClick('year')}
-                                                    onChange={(e) =>
-                                                        setBirthDate({ ...birthDate, year: e.target.value })
-                                                    }
+                                                    onChange={(e) => handleChangeData('birthdate.year', e.target.value)}
                                                 >
                                                     <option value="">Năm</option>
                                                     {[...Array(100).keys()].map((year) => (
@@ -227,26 +314,75 @@ function Modal() {
                                                 </select>
                                             </div>
                                         </div>
-                                        <label className={cx('note-text')}>
-                                            Ngày sinh của bạn sẽ không được hiển thị công khai.
-                                        </label>
+                                        {error.birthdate ? (
+                                            <span className={cx('error')}>{error.birthdate}</span>
+                                        ) : (
+                                            <label className={cx('note-text')}>
+                                                Ngày sinh của bạn sẽ không được hiển thị công khai.
+                                            </label>
+                                        )}
                                     </div>
                                     <div className={cx('input-wrapper')}>
                                         <label className={cx('label')}>Email</label>
                                         <Input
                                             type={'email'}
                                             placeholder={'Địa chỉ email'}
-                                            passState={[email, setEmail]}
+                                            value={formData.email}
+                                            onBlur={() => validData('email')}
+                                            onFocus={() => setError({ ...error, email: '' })}
+                                            onChange={(e) => handleChangeData('email', e.target.value)}
                                         />
+                                        {error.email && <span className={cx('error')}>{error.email}</span>}
                                         <Input
+                                            className={cx('password-register')}
                                             type={showPassword ? 'text' : 'password'}
                                             placeholder="Mật khẩu"
+                                            value={formData.password}
                                             button={<FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} />}
-                                            passState={[password, setPassword]}
+                                            onChange={handleCheckPassword}
                                             onClick={() => setShowPassword(!showPassword)}
                                         />
+                                        <div className={cx('check-password-register')}>
+                                            <label>Mật khẩu của bạn phải gồm:</label>
+                                            <span
+                                                className={cx(
+                                                    error.password ? (error.password.length ? 'error' : 'valid') : '',
+                                                )}
+                                            >
+                                                <FontAwesomeIcon
+                                                    icon={
+                                                        error.password
+                                                            ? error.password.length
+                                                                ? faXmark
+                                                                : faCheck
+                                                            : faCheck
+                                                    }
+                                                />
+                                                8 đến 20 ký tự
+                                            </span>
+                                            <span
+                                                className={cx(
+                                                    error.password
+                                                        ? error.password.character
+                                                            ? 'error'
+                                                            : 'valid'
+                                                        : '',
+                                                )}
+                                            >
+                                                <FontAwesomeIcon
+                                                    icon={
+                                                        error.password
+                                                            ? error.password.length
+                                                                ? faXmark
+                                                                : faCheck
+                                                            : faCheck
+                                                    }
+                                                />
+                                                Các chữ cái, số và ký tự đặc biệt
+                                            </span>
+                                        </div>
                                         <Input
-                                            type="number"
+                                            type="text"
                                             placeholder="Nhập mã gồm 6 chữ số"
                                             button={
                                                 loading ? (
@@ -262,15 +398,19 @@ function Modal() {
                                                 )
                                             }
                                             borderButtonLeft
-                                            buttonDisable={!email || loading || timer > 0}
-                                            passState={[otp, setOtp]}
-                                            onClick={handleResendOtp}
+                                            buttonDisable={!formData.email || loading || timer > 0}
+                                            value={otpValue}
+                                            onBlur={() => validData('otp')}
+                                            onFocus={() => setError({ ...error, otp: '' })}
+                                            onChange={(e) => setOtpValue(e.target.value)}
+                                            onClick={handleSendOtp}
                                         />
+                                        {error.otp && <span className={cx('error')}>{error.otp}</span>}
                                     </div>
                                     <Button
                                         size="large"
                                         bgPrimary
-                                        disable={!email || !password || !otp}
+                                        disable={!formData.email || !formData.password || !otpValue}
                                         className={cx('more-style-login-button')}
                                         onClick={handleVerifyOtp}
                                     >
@@ -282,20 +422,28 @@ function Modal() {
                             {screen === 'login' && (
                                 <>
                                     <div className={cx('input-wrapper')}>
-                                        <Input type={'email'} placeholder={'Email'} passState={[email, setEmail]} />
+                                        <Input
+                                            type={'email'}
+                                            placeholder={'Email'}
+                                            value={formData.email}
+                                            onChange={(e) => handleChangeData('email', e.target.value)}
+                                        />
+                                        {error.email && <span className={cx('error')}>{error.email}</span>}
                                         <Input
                                             type={showPassword ? 'text' : 'password'}
                                             placeholder="Mật khẩu"
+                                            value={formData.password}
                                             button={<FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} />}
-                                            passState={[password, setPassword]}
+                                            onChange={(e) => handleChangeData('password', e.target.value)}
                                             onClick={() => setShowPassword(!showPassword)}
                                         />
+                                        {error.password && <span className={cx('error')}>{error.password}</span>}
                                         <div className={cx('forgot-password')}>Quên mật khẩu?</div>
                                     </div>
                                     <Button
                                         size="large"
                                         bgPrimary
-                                        disable={!email || !password}
+                                        disable={!formData.email || !formData.password}
                                         className={cx('more-style-login-button')}
                                         onClick={handleLogin}
                                     >
@@ -311,13 +459,16 @@ function Modal() {
                                         <Input
                                             type={'text'}
                                             placeholder={'TikTok ID'}
-                                            passState={[tiktokId, setTiktokId]}
+                                            value={formData.tiktokId}
+                                            onBlur={() => validData('tiktokId')}
+                                            onChange={(e) => handleChangeData('tiktokId', e.target.value)}
                                         />
+                                        {error.tiktokId && <span className={cx('error')}>{error.tiktokId}</span>}
                                     </div>
                                     <Button
                                         size="large"
                                         bgPrimary
-                                        disable={!tiktokId}
+                                        disable={!formData.tiktokId}
                                         className={cx('more-style-login-button')}
                                         onClick={handleRegister}
                                     >

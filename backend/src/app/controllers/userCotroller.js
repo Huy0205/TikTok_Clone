@@ -13,6 +13,7 @@ const handleSendOTPByMail = async (req, res) => {
   if (!email) {
     return res.status(400).json({
       status: 400,
+      code: "EMAIL_REQUIRED",
       message: "Email is required",
     });
   }
@@ -22,9 +23,11 @@ const handleSendOTPByMail = async (req, res) => {
 
 const handleVerifyOTP = async (req, res) => {
   const { email, otp } = req.body;
+  console.log(email, otp);
   if (!email || !otp) {
     return res.status(400).json({
       status: 400,
+      code: "EMAIL_OTP_REQUIRED",
       message: "Email and OTP are required",
     });
   }
@@ -33,10 +36,14 @@ const handleVerifyOTP = async (req, res) => {
 };
 
 const handleRegister = async (req, res) => {
-  const { email, password, tiktokId, birthdate } = req.body;
+  const {
+    formData: { email, password, tiktokId, birthdate },
+  } = req.body;
+  console.log(email, password, tiktokId, birthdate);
   if (!email || !password || !tiktokId || !birthdate) {
     return res.status(400).json({
       status: 400,
+      code: "EMAIL_PASSWORD_TIKTOKID_BIRTHDATE_REQUIRED",
       message: "Email, password, tiktokId and birthdate are required",
     });
   }
@@ -55,10 +62,13 @@ const handleRegister = async (req, res) => {
 };
 
 const handleLogin = async (req, res) => {
-  const { email, password } = req.body;
+  const {
+    formData: { email, password },
+  } = req.body;
   if (!email || !password) {
     return res.status(400).json({
       status: 400,
+      code: "EMAIL_PASSWORD_REQUIRED",
       message: "Email and password are required",
     });
   }
@@ -71,6 +81,7 @@ const handleSearch = async (req, res) => {
   if (!keyword) {
     return res.status(400).json({
       status: 400,
+      code: "KEYWORD_REQUIRED",
       message: "Keyword is required",
     });
   }

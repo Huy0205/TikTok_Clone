@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import classNames from 'classnames/bind';
 
@@ -6,6 +6,7 @@ import styles from './VideoItem.module.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faVolumeHigh, faVolumeLow, faVolumeXmark } from '@fortawesome/free-solid-svg-icons';
 import { FloatingPlayerIcon, MusicIcon, PauseIcon, PlayIcon } from '~/components/Icon';
+import { VideoContext } from '~/contexts/VideoContext';
 
 const cx = classNames.bind(styles);
 
@@ -13,10 +14,11 @@ function VideoFooter({ videoRef, hoverVideo }) {
     const [hideDescription, setHideDescription] = useState(false);
     const [more, setMore] = useState(false);
     const [progress, setProgress] = useState(0);
-    const [isMuted, setIsMuted] = useState(true);
     const [volume, setVolume] = useState(1);
     const [iconVolume, setIconVolume] = useState(faVolumeXmark);
     const [isPlaying, setIsPlaying] = useState(true);
+
+    const { isMuted, setIsMuted } = useContext(VideoContext);
 
     const descriptionRef = useRef();
 
@@ -27,6 +29,14 @@ function VideoFooter({ videoRef, hoverVideo }) {
             }
         }
     }, []);
+
+    useEffect(() => {
+        if (isMuted) {
+            setIconVolume(faVolumeXmark);
+        } else {
+            setIconVolume(volume < 0.6 ? faVolumeLow : faVolumeHigh);
+        }
+    }, [isMuted, volume]);
 
     useEffect(() => {
         const video = videoRef.current;
@@ -41,6 +51,7 @@ function VideoFooter({ videoRef, hoverVideo }) {
         return () => {
             video.removeEventListener('timeupdate', updateProgress);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleProgressClick = (e) => {
@@ -67,17 +78,13 @@ function VideoFooter({ videoRef, hoverVideo }) {
         if (percent <= 0.1) {
             percent = 0;
             setIsMuted(true);
-            setIconVolume(faVolumeXmark);
         } else if (percent <= 0.6) {
             setIsMuted(false);
-            setIconVolume(faVolumeLow);
         } else if (percent <= 1) {
             setIsMuted(false);
-            setIconVolume(faVolumeHigh);
         } else {
             percent = 1;
             setIsMuted(false);
-            setIconVolume(faVolumeHigh);
         }
 
         setVolume(percent);
@@ -103,11 +110,9 @@ function VideoFooter({ videoRef, hoverVideo }) {
                 videoRef.current.volume = 1;
                 setVolume(1);
             }
-            setIconVolume(volume < 0.5 ? faVolumeLow : faVolumeHigh);
             setIsMuted(false);
         } else {
             videoRef.current.muted = true;
-            setIconVolume(faVolumeXmark);
             setIsMuted(true);
         }
     };
@@ -133,9 +138,14 @@ function VideoFooter({ videoRef, hoverVideo }) {
                         </div>
                     )}
                 </div>
-                <div className={cx('music-info')}>
-                    <MusicIcon />
-                    <span className={cx('music-name')}>Nhạc nền</span>
+                <div className={cx('music-info', { hoverVideo })}>
+                    <span className={cx('music-icon')}>
+                        <MusicIcon />
+                    </span>
+                    <span className={cx('music-name')}>
+                        Nhạc nền sit amet consectetur adipisicing elit. Quisquam, quos. Lorem ipsum dolor sit amet
+                        consectetur adipisicing elit. Quisquam, quos.
+                    </span>
                 </div>
             </div>
             <div className={cx('bottom')}>
@@ -155,7 +165,7 @@ function VideoFooter({ videoRef, hoverVideo }) {
                         </button>
                     </>
                 )}
-                <div className={cx('volume-container', { hoverVideo: !hoverVideo })}>
+                <div className={cx('volume-container', { hoverVideo })}>
                     <button className={cx('volume-btn')} onClick={handleOnOffVolume}>
                         <FontAwesomeIcon icon={iconVolume} />
                     </button>
