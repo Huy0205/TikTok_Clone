@@ -14,7 +14,7 @@ function Accounts({ accounts }) {
                     size="large"
                     noneStyleButton
                     className={classNames(styles['account-item'])}
-                    to={`/@${account.nickname}`}
+                    to={`/@${account.tiktokId}`}
                 >
                     <AccountItem account={account} />
                 </Button>

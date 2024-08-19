@@ -6,11 +6,16 @@ import VideoItem from './VideoItem/VideoItem';
 
 const cx = classNames.bind(styles);
 
-function VideoList({ data }) {
+function VideoList({ data, lastVideoElementRef }) {
     return (
         <div className={cx('wrapper')}>
-            {data.map((item) => (
-                <VideoItem key={item.id} data={item} />
+            {data.map((item, index) => (
+                <VideoItem
+                    key={item._id}
+                    data={item}
+                    isLast={index === data.length - 1}
+                    lastVideoElementRef={lastVideoElementRef}
+                />
             ))}
         </div>
     );

@@ -14,7 +14,9 @@ function App() {
         setLoading(true);
         const fetchAccount = async () => {
             const response = await UserServices.getAccount();
-            if (response?.data) {
+            if (response.code === 'TOKEN_EXPIRED' || response.code === 'UNAUTHORIZED') {
+                console.log(response.message);
+            } else {
                 setAuth({
                     isAuthenticated: true,
                     user: response.data,
@@ -26,7 +28,12 @@ function App() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    if (loading) return <Loading />;
+    if (loading)
+        return (
+            <div style={{ height: '100vh' }}>
+                <Loading />
+            </div>
+        );
 
     return (
         <Router>

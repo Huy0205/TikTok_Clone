@@ -1,12 +1,14 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import classNames from 'classnames/bind';
 
+import styles from './Sidebar.module.scss';
+import { UserServices } from '~/services';
+import { AuthContext } from '~/contexts/AuthContext';
+import { ModalContext } from '~/contexts';
 import Menu from './Menu/Menu';
 import Button from '~/components/Button';
-import styles from './Sidebar.module.scss';
-import { AuthContext } from '~/contexts/AuthContext';
 import images from '~/assets/images';
-import { ModalContext } from '~/contexts';
+import AccountItem from '~/components/AccountItem';
 
 const cx = classNames.bind(styles);
 
@@ -14,6 +16,26 @@ function Sidebar() {
     const { openModal } = useContext(ModalContext);
     const { auth } = useContext(AuthContext);
     const { isAuthenticated } = auth;
+
+    const [followings, setFollowings] = useState([]);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+
+    useEffect(() => {
+        const fetchFollowings = async () => {
+            const res = await UserServices.getUserByFollowings(page, 10);
+            if (res) {
+                setFollowings((prev) => [...prev, ...res.data]);
+                setHasMore(res.data.length % 10 === 0);
+            }
+        };
+
+        fetchFollowings();
+    }, [page]);
+
+    const handleIncreasePage = async () => {
+        setPage(page + 1);
+    };
 
     return (
         <aside className={cx('wrapper')}>
@@ -26,6 +48,26 @@ function Sidebar() {
                     <Button size="large" borderPrimary onClick={openModal}>
                         <span className={cx('text-login-btn')}>Đăng nhập</span>
                     </Button>
+                </div>
+            )}
+            {followings.length > 0 && (
+                <div className={cx('followings-container')}>
+                    <h4 className={cx('followings-title')}>Các tài khoản Đã follow</h4>
+                    {followings.map((following) => (
+                        <Button
+                            key={following._id}
+                            size="large"
+                            noneStyleButton
+                            className={cx('account-item-container')}
+                        >
+                            <AccountItem account={following} className={cx('account-item')} />
+                        </Button>
+                    ))}
+                    {hasMore && (
+                        <button className={cx('more-btn')} onClick={handleIncreasePage}>
+                            Xem thêm
+                        </button>
+                    )}
                 </div>
             )}
             <div className={cx('footer')}>

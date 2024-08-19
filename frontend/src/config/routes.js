@@ -4,7 +4,7 @@ const routes = {
     following: '/following',
     friends: '/friends',
     live: '/live',
-    profile: '/:nickname',
+    profile: '/:tiktokId',
     upload: '/upload',
     search: '/search',
 };

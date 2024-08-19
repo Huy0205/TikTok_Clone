@@ -10,15 +10,14 @@ import { VideoContext } from '~/contexts/VideoContext';
 
 const cx = classNames.bind(styles);
 
-function VideoFooter({ videoRef, hoverVideo }) {
+function VideoFooter({ videoRef, hoverVideo, publisherId, music, title }) {
     const [hideDescription, setHideDescription] = useState(false);
     const [more, setMore] = useState(false);
     const [progress, setProgress] = useState(0);
-    const [volume, setVolume] = useState(1);
     const [iconVolume, setIconVolume] = useState(faVolumeXmark);
     const [isPlaying, setIsPlaying] = useState(true);
 
-    const { isMuted, setIsMuted } = useContext(VideoContext);
+    const { isMuted, setIsMuted, volume, setVolume } = useContext(VideoContext);
 
     const descriptionRef = useRef();
 
@@ -37,6 +36,21 @@ function VideoFooter({ videoRef, hoverVideo }) {
             setIconVolume(volume < 0.6 ? faVolumeLow : faVolumeHigh);
         }
     }, [isMuted, volume]);
+
+    useEffect(() => {
+        const video = videoRef.current;
+
+        const handlePlay = () => setIsPlaying(true);
+        const handlePause = () => setIsPlaying(false);
+
+        video.addEventListener('play', handlePlay);
+        video.addEventListener('pause', handlePause);
+
+        return () => {
+            video.removeEventListener('play', handlePlay);
+            video.removeEventListener('pause', handlePause);
+        };
+    }, [videoRef]);
 
     useEffect(() => {
         const video = videoRef.current;
@@ -100,7 +114,6 @@ function VideoFooter({ videoRef, hoverVideo }) {
         } else {
             videoRef.current.play();
         }
-        setIsPlaying(!isPlaying);
     };
 
     const handleOnOffVolume = () => {
@@ -120,15 +133,14 @@ function VideoFooter({ videoRef, hoverVideo }) {
     return (
         <div className={cx('footer')}>
             <div className={cx('link-container')}>
-                <Link className={cx('link-tiktokId')} to={`/@`}>
-                    <span>huy0205</span>
+                <Link className={cx('link-tiktokId')} to={`/@${publisherId}`}>
+                    <span>{publisherId}</span>
                 </Link>
             </div>
             <div className={cx('description-container')}>
                 <div className={cx('description', { more })}>
                     <span className={cx('description-content', { more })} ref={descriptionRef}>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos. Lorem ipsum dolor sit
-                        amet consectetur adipisicing elit. Quisquam, quos.
+                        {title}
                     </span>
                     {hideDescription && (
                         <div className={cx('more-btn-container')}>
@@ -142,10 +154,7 @@ function VideoFooter({ videoRef, hoverVideo }) {
                     <span className={cx('music-icon')}>
                         <MusicIcon />
                     </span>
-                    <span className={cx('music-name')}>
-                        Nhạc nền sit amet consectetur adipisicing elit. Quisquam, quos. Lorem ipsum dolor sit amet
-                        consectetur adipisicing elit. Quisquam, quos.
-                    </span>
+                    <span className={cx('music-name')}>{music}</span>
                 </div>
             </div>
             <div className={cx('bottom')}>

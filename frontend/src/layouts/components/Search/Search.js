@@ -36,13 +36,13 @@ function Search() {
                         UserServices.search(auth.user.tiktokId, debouncedValue, 1, 5),
                     ]);
 
-                    if (keywordsRes.code === 'SEARCH_SUCCESSFULLY') {
+                    if (keywordsRes.code === 'OK') {
                         setKeywords(keywordsRes.data);
                     } else {
                         throw new Error(keywordsRes.message);
                     }
 
-                    if (accountsRes.code === 'SEARCH_SUCCESSFULLY') {
+                    if (accountsRes.code === 'OK') {
                         setAccounts(accountsRes.data);
                     } else {
                         throw new Error(accountsRes.message);
@@ -55,9 +55,9 @@ function Search() {
                 }
 
                 const increaseKeywordCountRes = await KeywordServices.inscreaseKeywordCount(debouncedValue);
-                if (increaseKeywordCountRes?.status === 200) {
+                if (increaseKeywordCountRes?.code === 'OK') {
                     console.log('Increase keyword count successfully');
-                } else if (increaseKeywordCountRes?.status === 500) {
+                } else{
                     console.log('Server error');
                 }
             };

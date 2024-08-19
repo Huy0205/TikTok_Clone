@@ -1,66 +1,58 @@
-import VideoList from '~/components/VideoList';
-import video1 from '~/assets/video/test.mp4';
-import video2 from '~/assets/video/test2.mp4';
-import video3 from '~/assets/video/test3.mp4';
+import { useContext, useEffect, useState, useRef, useCallback } from 'react';
 
 import { VideoServices } from '~/services';
-import { useContext, useEffect } from 'react';
 import { AuthContext } from '~/contexts';
-
-const fakeData = [
-    {
-        id: 1,
-        src: video1,
-        title: 'Video 1',
-        author: 'John Doe',
-        likes: 10,
-        comments: 3,
-        shares: 5,
-    },
-    {
-        id: 3,
-        src: video3,
-        title: 'Video 3',
-        author: 'John Doe',
-        likes: 10,
-        comments: 3,
-        shares: 5,
-    },
-    {
-        id: 2,
-        src: video2,
-        title: 'Video 2',
-        author: 'John Doe',
-        likes: 10,
-        comments: 3,
-        shares: 5,
-    },
-    {
-        id: 4,
-        src: 'https://res.cloudinary.com/dpdymg8vm/video/upload/v1723190829/TikTok_Clone/f16uescq7cidntprtf0w.mp4',
-        title: 'Video 4',
-        author: 'John Doe',
-        likes: 10,
-        comments: 3,
-        shares: 5,
-    },
-];
+import VideoList from '~/components/VideoList';
+import Loading from '~/components/Loading';
 
 function Home() {
+    const [loading, setLoading] = useState(false);
+    const [data, setData] = useState([]);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+
     const { auth } = useContext(AuthContext);
 
+    const observer = useRef();
+    const lastVideoElementRef = useCallback(
+        (node) => {
+            if (loading) return;
+            if (observer.current) observer.current.disconnect();
+            observer.current = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting && hasMore) {
+                    setPage((prevPage) => prevPage + 1);
+                }
+            });
+            if (node) observer.current.observe(node);
+        },
+        [loading, hasMore],
+    );
+
     useEffect(() => {
+        setLoading(true);
         const fetchRecommendedVideos = async () => {
-            const res = await VideoServices.recommendedVideos(auth.user.tiktokId, 1, 10);
-            console.log(res);
+            const res = await VideoServices.recommendedVideos(auth.user.tiktokId, page, 10);
+            if (res.code === 'OK') {
+                setData((prev) => [...prev, ...res.data]);
+                setHasMore(res.data.length > 0);
+                setLoading(false);
+            } else {
+                console.error(res.message);
+            }
         };
 
         fetchRecommendedVideos();
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [page]);
 
     return (
         <div>
-            <VideoList data={fakeData} />
+            <VideoList data={data} lastVideoElementRef={lastVideoElementRef} />
+            {loading && (
+                <div style={{ height: 100 }}>
+                    <Loading />
+                </div>
+            )}
         </div>
     );
 }

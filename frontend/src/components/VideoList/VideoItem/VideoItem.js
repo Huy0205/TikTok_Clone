@@ -9,11 +9,11 @@ import { VideoContext } from '~/contexts/VideoContext';
 
 const cx = classNames.bind(styles);
 
-function VideoItem({ data }) {
+function VideoItem({ data, isLast, lastVideoElementRef }) {
     const [classes, setClasses] = useState(cx('video-item-wrapper'));
     const [hover, setHover] = useState(false);
 
-    const { isMuted } = useContext(VideoContext);
+    const { isMuted, volume } = useContext(VideoContext);
 
     const videoRef = useRef();
 
@@ -76,8 +76,18 @@ function VideoItem({ data }) {
         };
     }, [videoRef]);
 
+    useEffect(() => {
+        if (videoRef.current) {
+            if (isMuted) {
+                videoRef.current.volume = 0;
+            } else {
+                videoRef.current.volume = volume;
+            }
+        }
+    }, [isMuted, volume]);
+
     return (
-        <div className={classes}>
+        <div className={classes} ref={isLast ? lastVideoElementRef : null}>
             <div
                 className={cx('video-item-container')}
                 onMouseEnter={() => setHover(true)}
@@ -86,21 +96,29 @@ function VideoItem({ data }) {
                 <video
                     ref={videoRef}
                     className={cx('video')}
-                    src={data.src}
+                    src={data.url}
                     muted={isMuted}
                     loop
                     preload="auto"
                     playsInline
                 />
-                <VideoFooter videoRef={videoRef} hoverVideo={hover} />
+                <VideoFooter
+                    videoRef={videoRef}
+                    hoverVideo={hover}
+                    publisherId={data.publisherId}
+                    music={data.music}
+                    title={data.title}
+                />
             </div>
-            <VideoSibar />
+            <VideoSibar publisherId={data.publisherId} shares={data.shares} />
         </div>
     );
 }
 
 VideoItem.propTypes = {
     data: PropTypes.object.isRequired,
+    isLast: PropTypes.bool.isRequired,
+    lastVideoElementRef: PropTypes.func.isRequired,
 };
 
 export default VideoItem;

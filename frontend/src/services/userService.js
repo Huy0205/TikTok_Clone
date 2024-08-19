@@ -2,7 +2,17 @@ import axios from '~/util/axios.customize';
 
 export const getAccount = async () => {
     try {
-        const res = await axios.get('/user');
+        const res = await axios.get('/user/auth');
+        return res;
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+};
+
+export const getUserByTiktokId = async (tiktokId) => {
+    try {
+        const res = await axios.get('/user', { params: { tiktokId } });
         return res;
     } catch (error) {
         console.error(error);
@@ -53,6 +63,16 @@ export const login = async (formData) => {
 export const search = async (currentTiktokId, keyword, page, limit) => {
     try {
         const res = await axios.get('/user/search', { params: { currentTiktokId, keyword, page, limit } });
+        return res;
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+};
+
+export const getUserByFollowings = async (page, limit) => {
+    try {
+        const res = await axios.get('/user/followings', { params: { page, limit } });
         return res;
     } catch (error) {
         console.error(error);

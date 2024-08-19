@@ -162,7 +162,7 @@ function Modal() {
         const response = await UserServices.sendOTPByMail(formData.email);
         if (response.code === 'EMAIL_ALREADY_EXISTS') {
             setError({ ...error, email: 'Email này đã được liên kết với một tài khoản khác!' });
-        } else if (response.code === 'OTP_SENT_SUCCESSFULLY') {
+        } else if (response.code === 'OK') {
             setTimer(60);
         } else {
             alert('Có lỗi xảy ra, vui lòng thử lại sau!');
@@ -187,7 +187,7 @@ function Modal() {
         }
 
         const response = await UserServices.verifyOTP(formData.email, otpValue);
-        if (response.code === 'OTP_IS_CORRECT') {
+        if (response.code === 'OK') {
             changeForm('inputTiktokId');
         } else if (response.code === 'OTP_IS_EXPIRED') {
             setError({ ...error, otp: 'Mã OTP đã hết hạn, vui lòng gửi lại mã mới!' });
@@ -206,7 +206,7 @@ function Modal() {
         const response = await UserServices.register(formData);
         if (response.code === 'TIKTOKID_IS_EXIST') {
             setError({ ...error, tiktokId: 'TikTok ID này đã tồn tại!' });
-        } else if (response.code === 'REGISTER_SUCCESSFULLY') {
+        } else if (response.code === 'OK') {
             alert('Đăng ký thành công!');
             changeForm('login');
         } else {
@@ -220,7 +220,7 @@ function Modal() {
             setError({ ...error, email: 'Email không tồn tại!' });
         } else if (response.code === 'PASSWORD_INCORRECT') {
             setError({ ...error, password: 'Mật khẩu không đúng!' });
-        } else if (response.code === 'LOGIN_SUCCESSFULLY') {
+        } else if (response.code === 'OK') {
             const { token, user } = response.data;
             localStorage.setItem('access_token', token);
             setAuth({

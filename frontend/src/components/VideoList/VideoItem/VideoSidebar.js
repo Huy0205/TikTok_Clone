@@ -1,22 +1,30 @@
+import { useEffect, useState } from 'react';
 import classNames from 'classnames/bind';
 import { Link } from 'react-router-dom';
 
 import styles from './VideoItem.module.scss';
+import { UserServices } from '~/services';
 import Avatar from '~/components/Avatar';
 import { BookmarkIcon, CommentIcon, HeartIcon, ShareIcon } from '~/components/Icon';
 
 const cx = classNames.bind(styles);
 
-function VideoSibar() {
+function VideoSibar({ publisherId, shares }) {
+    const [publisher, setPublisher] = useState();
+
+    useEffect(() => {
+        const fetchPublisher = async () => {
+            const res = await UserServices.getUserByTiktokId(publisherId);
+            setPublisher(res.data);
+        };
+        fetchPublisher();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     return (
         <div className={cx('sibar')}>
-            <Link to={'/'} className={cx('btn')}>
-                <Avatar
-                    src="https://p16-sign-sg.tiktokcdn.com/aweme/100x100/tos-alisg-avt-0068/2230b7161a0f08eb041b38bc42238bbf.jpeg?lk3s=a5d48078&nonce=41733&refresh_token=7b7efc11219586152769a1f638876149&x-expires=1723194000&x-signature=kQCPGB4adI7aXx20GxobEDJ5%2F2k%3D&shp=a5d48078&shcp=b59d6b55"
-                    alt="avatar"
-                    size={48}
-                    className={cx('avatar')}
-                />
+            <Link to={`/@${publisherId}`} className={cx('btn')}>
+                <Avatar src={publisher?.avatar} alt={publisher?.nickname} size={48} className={cx('avatar')} />
             </Link>
             <button className={cx('btn')}>
                 <span className={cx('icon-btn-wrapper')}>
@@ -40,7 +48,7 @@ function VideoSibar() {
                 <span className={cx('icon-btn-wrapper')}>
                     <ShareIcon />
                 </span>
-                <strong>1433</strong>
+                <strong>{shares}</strong>
             </button>
         </div>
     );

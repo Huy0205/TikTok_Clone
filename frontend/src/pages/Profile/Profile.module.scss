@@ -1,0 +1,165 @@
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    padding: 32px 24px 36px;
+    min-height: calc(-59px + 100vh);
+}
+
+.container {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    width: 90%;
+    margin: 0px auto;
+}
+
+.info {
+    position: relative;
+    flex: 0 0 auto;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+    max-width: 100%;
+    padding-right: 0px;
+    padding-left: 0px;
+    min-height: 140px;
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+    gap: 28px;
+}
+
+.name-container,
+.action,
+.number-container,
+.avatar-container {
+    display: flex;
+    gap: 12px;
+}
+
+.info-content {
+    flex: 1 1 0%;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    -webkit-box-pack: justify;
+    justify-content: space-between;
+    margin: 0px;
+    gap: 12px;
+}
+
+.tiktokId {
+    font-size: 2.4rem;
+    font-weight: 700;
+    line-height: 30px;
+}
+
+.nickname {
+    display: flex;
+    align-items: flex-end;
+    max-width: 450px;
+    font-size: 1.8rem;
+    font-weight: 600;
+    line-height: 24px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.number-container {
+    gap: 0;
+}
+
+.number-item {
+    margin-right: 20px;
+}
+
+.number {
+    font-weight: 600;
+    font-size: 18px;
+    line-height: 24px;
+    color: rgb(22, 24, 35);
+}
+
+.number-text {
+    margin-left: 6px;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 20px;
+    color: rgba(22, 24, 35, 0.75);
+}
+
+.btn-item {
+    font-weight: 600;
+    border: 0;
+    gap: 0;
+
+    &.custom {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+}
+
+.list-video-wrapper {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+}
+
+.options-container {
+    --color-active: rgb(22, 24, 35);
+    --color-none-active: rgb(115, 116, 123);
+
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    border-bottom: 1px solid rgba(234, 234, 235, 1);
+}
+
+.tab {
+    position: relative;
+    display: flex;
+
+    p {
+        display: flex;
+        align-items: center;
+        height: 44px;
+        padding: 0px 32px;
+        font-size: 1.8rem;
+        font-weight: 600;
+        line-height: 24px;
+        color: var(--color-none-active);
+        cursor: pointer;
+
+        &[aria-selected='true'] {
+            color: var(--color-active);
+        }
+    }
+}
+
+.underline {
+    position: absolute;
+    height: 2px;
+    background: rgb(22, 24, 35);
+    bottom: 0px;
+    transition: transform 0.3s ease 0s;
+}
+
+.sort {
+    display: flex;
+    padding: 2px;
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.05);
+
+    .sort-option {
+        border: 0;
+        color: var(--color-none-active);
+
+        &.active {
+            color: var(--color-active);
+        }
+    }
+}
+
+.loading {
+    height: 100px;
+}

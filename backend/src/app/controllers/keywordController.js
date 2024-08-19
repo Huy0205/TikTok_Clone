@@ -5,6 +5,7 @@ const handleInscreaseKeywordCount = async (req, res) => {
   if (!keyword) {
     return res.status(400).json({
       status: 400,
+      code: "NOT_ENOUGH_INFO",
       message: "Keyword is required",
     });
   }
@@ -17,7 +18,7 @@ const handleSearch = async (req, res) => {
   if (!keyword) {
     return res.status(400).json({
       status: 400,
-      code: "KEYWORD_REQUIRED",
+      code: "NOT_ENOUGH_INFO",
       message: "Keyword is required",
     });
   }

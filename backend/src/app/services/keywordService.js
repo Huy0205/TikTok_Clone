@@ -12,12 +12,14 @@ const inscreaseKeywordCount = async (keyword) => {
     }
     return {
       status: 200,
+      code: "OK",
       message: "Keyword count increased successfully",
     };
   } catch (error) {
     console.log(error);
     return {
       status: 500,
+      code: "ERROR",
       message: "Internal server error",
     };
   }
@@ -52,14 +54,14 @@ const search = async (keyword) => {
     ]).exec();
     return {
       status: 200,
-      code: "SEARCH_SUCCESSFULLY",
+      code: "OK",
       data: keywordInstance,
     };
   } catch (error) {
     console.log(error);
     return {
       status: 500,
-      code: "INTERNAL_SERVER_ERROR",
+      code: "ERROR",
       message: "Internal server error",
     };
   }

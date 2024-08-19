@@ -12,24 +12,19 @@ const getUserByTiktokId = async (tiktokId) => {
     if (!user) {
       return {
         status: 404,
-        code: "USER_NOT_FOUND",
+        code: "NOT_FOUND",
         message: "User not found",
       };
     }
     return {
       status: 200,
-      data: {
-        tiktokId: user.tiktokId,
-        nickname: user.nickname,
-        email: user.email,
-        birthdate: user.birthdate,
-        avatar: user.avatar,
-      },
+      code: "OK",
+      data: user,
     };
   } catch (error) {
     return {
       status: 500,
-      code: "INTERNAL_SERVER_ERROR",
+      code: "ERROR",
       message: "Internal server error",
     };
   }
@@ -73,14 +68,14 @@ const sendOTPByMail = async (email) => {
     await redisClient.set(email, otp, "EX", 60 * 60 * 48);
     return {
       status: 200,
-      code: "OTP_SENT_SUCCESSFULLY",
+      code: "OK",
       message: "OTP sent successfully",
     };
   } catch (error) {
     console.log(error);
     return {
       status: 500,
-      code: "INTERNAL_SERVER_ERROR",
+      code: "ERROR",
       message: "Internal server error",
     };
   }
@@ -92,7 +87,7 @@ const verifyOTP = async (email, otp) => {
     if (otpInRedis === otp) {
       return {
         status: 200,
-        code: "OTP_IS_CORRECT",
+        code: "OK",
         message: "OTP is correct",
       };
     }
@@ -112,7 +107,7 @@ const verifyOTP = async (email, otp) => {
     console.log(error);
     return {
       status: 500,
-      code: "INTERNAL_SERVER_ERROR",
+      code: "ERROR",
       message: "Internal server error",
     };
   }
@@ -141,14 +136,14 @@ const register = async (email, password, tiktokId, birthdate) => {
 
     return {
       status: 200,
-      code: "REGISTER_SUCCESSFULLY",
+      code: "OK",
       message: "Register successfully",
     };
   } catch (error) {
     console.log(error);
     return {
       status: 500,
-      code: "INTERNAL_SERVER_ERROR",
+      code: "ERROR",
       message: "Internal server error",
     };
   }
@@ -184,7 +179,7 @@ const login = async (email, password) => {
     );
     return {
       status: 200,
-      code: "LOGIN_SUCCESSFULLY",
+      code: "OK",
       message: "Login successfully",
       data: {
         token,
@@ -201,7 +196,7 @@ const login = async (email, password) => {
     console.log(error);
     return {
       status: 500,
-      code: "INTERNAL_SERVER_ERROR",
+      code: "ERROR",
       message: "Internal server error",
     };
   }
@@ -234,14 +229,35 @@ const search = async (currentTiktokId, keyword, page, limit) => {
 
     return {
       status: 200,
-      code: "SEARCH_SUCCESSFULLY",
+      code: "OK",
       data: users,
     };
   } catch (error) {
     console.log(error);
     return {
       status: 500,
-      code: "INTERNAL_SERVER_ERROR",
+      code: "ERROR",
+      message: "Internal server error",
+    };
+  }
+};
+
+const getUserByFollowings = async (followings, page, limit) => {
+  try {
+    const users = await User.find({ tiktokId: { $in: followings } })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .exec();
+    return {
+      status: 200,
+      code: "OK",
+      data: users,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      code: "ERROR",
       message: "Internal server error",
     };
   }
@@ -254,4 +270,5 @@ module.exports = {
   register,
   login,
   search,
+  getUserByFollowings,
 };

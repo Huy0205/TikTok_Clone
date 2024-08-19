@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 
 const auth = (req, res, next) => {
   const whiteList = [
+    "/user",
     "/user/send-otp-mail",
     "/user/verify-otp",
     "/user/register",
@@ -9,7 +10,10 @@ const auth = (req, res, next) => {
     "/user/search",
     "/keyword/inscrease-keyword-count",
     "/keyword/search",
-    "/video/recomended",
+    "/video/recommended",
+    "/video/publisher",
+    "/video/liked",
+    "/follow/countOfUser",
   ];
   if (whiteList.includes(req.path)) {
     return next();

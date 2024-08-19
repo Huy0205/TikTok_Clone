@@ -1,4 +1,5 @@
 .wrapper {
+    width: 100%;
     padding: 9px 16px;
     cursor: pointer;
     display: flex;
@@ -9,24 +10,34 @@
     margin-right: 12px;
 }
 
+.info-container {
+    max-width: 75%;
+}
+
 .info {
-    flex: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.tiktokId,
+.nickname {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .tiktokId {
     font-size: 1.6rem;
     line-height: 21px;
     font-weight: 600;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
+
 .nickname {
     font-size: 1.4rem;
     line-height: 18px;
     color: rgba(22, 24, 35, 0.5);
     font-weight: 400;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }

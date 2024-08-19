@@ -1,15 +1,17 @@
 .wrapper {
+    --border-top: 1px solid rgba(234, 234, 235, 1);
+
     position: fixed;
     z-index: 15;
     width: var(--width-sidebar-default);
     height: calc(100vh - var(--header-height-default));
-    padding: 20px 8px 26px 8px;
+    padding: 20px 0 26px 8px;
     overflow-y: auto;
 }
 
 .login-wrapper {
     padding: 20px 8px 24px;
-    border-top: 1px solid rgba(234, 234, 235, 1);
+    border-top: var(--border-top);
 }
 
 .login-tip {
@@ -24,6 +26,38 @@
     line-height: 25px;
     font-weight: 600;
     color: var(--primary);
+}
+
+.followings-container {
+    display: flex;
+    flex-direction: column;
+    padding: 16px 0px;
+    border-top: var(--border-top);
+}
+
+.followings-title,
+.more-btn {
+    padding: 0px 8px;
+    font-size: 1.4rem;
+    font-weight: 600;
+    line-height: 18px;
+}
+
+.followings-title {
+    margin-bottom: 8px;
+}
+
+.account-item-container {
+    padding: 0;
+}
+
+.account-item {
+    padding: 8px;
+}
+
+.more-btn {
+    margin-top: 8px;
+    color: rgb(254, 44, 85);
 }
 
 .footer {

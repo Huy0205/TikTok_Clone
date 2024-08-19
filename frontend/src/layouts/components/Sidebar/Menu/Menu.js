@@ -96,7 +96,7 @@ function Menu() {
                 noneStyleButton
                 canActive={isAuthenticated}
                 className={cx('menu-item')}
-                {...(isAuthenticated ? { to: `/@${user.nickname}` } : { onClick: openModal })}
+                {...(isAuthenticated ? { to: `/@${user.tiktokId}` } : { onClick: openModal })}
             >
                 <span className={cx('menu-item-text')}>Hồ sơ</span>
             </Button>
