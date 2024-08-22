@@ -7,13 +7,6 @@ const {
 
 const handleRecomendedVideos = async (req, res) => {
   const { currentTiktokId, page, limit } = req.query;
-  if (!currentTiktokId) {
-    return res.status(400).json({
-      status: 400,
-      code: "NOT_ENOUGH_INFO",
-      message: "currentTiktokId is required",
-    });
-  }
 
   const watchHistorysRes =
     await WatchHistoryServices.findWatchHistoryByWatcherId(currentTiktokId);

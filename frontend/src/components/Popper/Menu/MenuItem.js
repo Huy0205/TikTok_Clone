@@ -10,7 +10,8 @@ function MenuItem({ item, onClick, className }) {
     }
 
     return (
-        <Button className={className} size="large" leftIcon={icon} noneStyleButton {...props} onClick={onClick}>
+        <Button className={className} size="large" noneStyleButton {...props} onClick={onClick}>
+            <span style={{ width: 20, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>{icon}</span>
             {title}
         </Button>
     );

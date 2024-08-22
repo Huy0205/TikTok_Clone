@@ -7,6 +7,7 @@ const cx = classNames.bind(styles);
 function Input({
     type,
     placeholder,
+    autoFocus = false,
     value,
     button,
     borderButtonLeft = false,
@@ -24,6 +25,7 @@ function Input({
                 type={type}
                 className={cx('textfile')}
                 placeholder={placeholder}
+                autoFocus={autoFocus}
                 value={value}
                 onFocus={onFocus}
                 onChange={onChange}
@@ -41,6 +43,7 @@ function Input({
 Input.propTypes = {
     type: PropTypes.string.isRequired,
     placeholder: PropTypes.string,
+    autoFocus: PropTypes.bool,
     button: PropTypes.node,
     borderButtonLeft: PropTypes.bool,
     buttonDisable: PropTypes.bool,

@@ -22,6 +22,7 @@ function Sidebar() {
     const [hasMore, setHasMore] = useState(true);
 
     useEffect(() => {
+        if (!isAuthenticated) return;
         const fetchFollowings = async () => {
             const res = await UserServices.getUserByFollowings(page, 10);
             if (res) {
@@ -31,7 +32,7 @@ function Sidebar() {
         };
 
         fetchFollowings();
-    }, [page]);
+    }, [isAuthenticated, page]);
 
     const handleIncreasePage = async () => {
         setPage(page + 1);
@@ -59,6 +60,7 @@ function Sidebar() {
                             size="large"
                             noneStyleButton
                             className={cx('account-item-container')}
+                            to={`/@${following.tiktokId}`}
                         >
                             <AccountItem account={following} className={cx('account-item')} />
                         </Button>

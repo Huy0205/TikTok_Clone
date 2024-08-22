@@ -425,7 +425,9 @@ function Modal() {
                                         <Input
                                             type={'email'}
                                             placeholder={'Email'}
+                                            autoFocus
                                             value={formData.email}
+                                            onBlur={() => setError({ ...error, email: '' })}
                                             onChange={(e) => handleChangeData('email', e.target.value)}
                                         />
                                         {error.email && <span className={cx('error')}>{error.email}</span>}
@@ -434,6 +436,7 @@ function Modal() {
                                             placeholder="Mật khẩu"
                                             value={formData.password}
                                             button={<FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} />}
+                                            onBlur={() => setError({ ...error, password: '' })}
                                             onChange={(e) => handleChangeData('password', e.target.value)}
                                             onClick={() => setShowPassword(!showPassword)}
                                         />
