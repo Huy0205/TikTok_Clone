@@ -1,5 +1,5 @@
 const nodeMailer = require("nodemailer");
-const cache = require("node-cache")
+const NodeCache  = require("node-cache")
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { User } = require("../models");
