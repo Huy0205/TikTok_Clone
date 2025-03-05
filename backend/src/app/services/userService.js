@@ -1,10 +1,10 @@
 const nodeMailer = require("nodemailer");
-const {
-  redis: { redisClient },
-} = require("../../config");
+const cache = require("node-cache")
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { User } = require("../models");
+
+const cache = new NodeCache({ checkperiod: 60 * 60 });
 
 const getUserByTiktokId = async (tiktokId) => {
   try {
@@ -64,8 +64,16 @@ const sendOTPByMail = async (email) => {
         "</div>",
     };
 
-    await transporter.sendMail(mailOptions);
-    await redisClient.set(email, otp, "EX", 60 * 60 * 48);
+    const sendResult = await transporter.sendMail(mailOptions);
+    if (!sendResult) {
+      throw new Error("Error send email");
+    }
+
+    const isSuccess = cache.set(email, otp, 60 * 60 * 48);
+    if(!isSuccess) {
+      throw new Error('Error save OTP')
+    }
+
     return {
       status: 200,
       code: "OK",
@@ -83,15 +91,15 @@ const sendOTPByMail = async (email) => {
 
 const verifyOTP = async (email, otp) => {
   try {
-    const otpInRedis = await redisClient.get(email);
-    if (otpInRedis === otp) {
+    const otpInCache = cache.get(email);
+    if (otpInCache === otp) {
       return {
         status: 200,
         code: "OK",
         message: "OTP is correct",
       };
     }
-    if (!otpInRedis) {
+    if (!otpInCache) {
       return {
         status: 404,
         code: "OTP_IS_EXPIRED",

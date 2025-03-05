@@ -29,6 +29,12 @@ const handleSendOTPByMail = async (req, res) => {
       code: "NOT_ENOUGH_INFO",
       message: "Email is required",
     });
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return {
+      status: 400,
+      code: "INVALID_EMAIL",
+      message: "Invalid email",
+    };
   }
   const response = await UserServices.sendOTPByMail(email);
   return res.status(response.status).json(response);

@@ -5,7 +5,7 @@
 
  1. Front-end: HTML, CSS (SCSS), JavaScript, ReactJS.
 
- 2. Back-end: NodeJS (Express), JWT, Redis.
+ 2. Back-end: NodeJS (Express), JWT.
 
  3. Database: MongoDB (Atlas)
 ---
