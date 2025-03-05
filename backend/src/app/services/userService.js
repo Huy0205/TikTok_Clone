@@ -219,7 +219,6 @@ const search = async (currentTiktokId, keyword, page, limit) => {
           tiktokId: 1,
           nickname: 1,
           avatar: 1,
-          followers: { $size: "$followers" },
         },
       },
       { $sort: { followers: -1 } },
@@ -233,7 +232,7 @@ const search = async (currentTiktokId, keyword, page, limit) => {
       data: users,
     };
   } catch (error) {
-    console.log(error);
+    console.log(error, ">>>>>>>>>>>>>>>>>>>>>>>>.");
     return {
       status: 500,
       code: "ERROR",
