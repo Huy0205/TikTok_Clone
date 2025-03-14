@@ -1,5 +1,5 @@
 const nodeMailer = require("nodemailer");
-const NodeCache  = require("node-cache")
+const NodeCache = require("node-cache");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { User } = require("../models");
@@ -70,8 +70,8 @@ const sendOTPByMail = async (email) => {
     }
 
     const isSuccess = cache.set(email, otp, 60 * 60 * 48);
-    if(!isSuccess) {
-      throw new Error('Error save OTP')
+    if (!isSuccess) {
+      throw new Error("Error save OTP");
     }
 
     return {
@@ -92,7 +92,7 @@ const sendOTPByMail = async (email) => {
 const verifyOTP = async (email, otp) => {
   try {
     const otpInCache = cache.get(email);
-    if (otpInCache === otp) {
+    if (otpInCache === Number(otp)) {
       return {
         status: 200,
         code: "OK",

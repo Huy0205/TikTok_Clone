@@ -125,7 +125,10 @@ function Header() {
                         <Button
                             className={cx('upload-button-custom')}
                             leftIcon={<FontAwesomeIcon icon={faPlus} />}
+                            leftIconActive={<FontAwesomeIcon icon={faPlus} style={{ color: 'var(--primary)' }} />}
                             size="medium"
+                            canActive
+                            to={config.routes.upload}
                         >
                             Tải lên
                         </Button>
