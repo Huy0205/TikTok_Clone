@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const videoSchema = new mongoose.Schema(
   {
     publisherId: { type: String, required: true },
-    title: { type: String, required: true },
+    title: { type: String },
     url: { type: String, required: true },
     music: { type: String, required: true },
     shares: { type: Number, default: 0 },

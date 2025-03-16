@@ -13,7 +13,6 @@ export const recommendedVideos = async (currentTiktokId, page, limit) => {
 export const getVideoByFollowing = async (page, limit) => {
     try {
         const res = await axios.get('/video/following', { params: { page, limit } });
-        
         return res;
     } catch (error) {
         console.error(error);
@@ -23,7 +22,10 @@ export const getVideoByFollowing = async (page, limit) => {
 
 export const getVideoByPublisherId = async (publisherId, page, limit, sort) => {
     try {
+        console.log('publisherId', publisherId);
+        console.log('!publisherId', !publisherId);
         const res = await axios.get('/video/publisher', { params: { publisherId, page, limit, sort } });
+        console.log('test:', res);
         return res;
     } catch (error) {
         console.error(error);
@@ -34,6 +36,32 @@ export const getVideoByPublisherId = async (publisherId, page, limit, sort) => {
 export const getVideoUserLiked = async (userId, page, limit, sort) => {
     try {
         const res = await axios.get('/video/liked', { params: { userId, page, limit, sort } });
+        return res;
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+};
+
+export const uploadVideo = async (videoFile) => {
+    const formData = new FormData();
+    formData.append('video', videoFile);
+
+    try {
+        const res = await axios.post('/video/upload', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+
+        return res;
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+};
+
+export const saveVideo = async (video) => {
+    try {
+        const res = await axios.post('/video/add', { ...video });
         return res;
     } catch (error) {
         console.error(error);

@@ -1,4 +1,5 @@
-const { configDotenv } = require("dotenv");
+const fs = require("fs");
+const { cloudinary } = require("../../config");
 const Video = require("../models/video");
 
 /**
@@ -147,9 +148,75 @@ const getVideoUserLiked = async (likes, page = 1, limit = 10, sort = -1) => {
   }
 };
 
+/**
+ * Upload file lên Cloudinary
+ * @param {string} filePath - Đường dẫn tệp cần upload
+ * @returns {Promise<Object>} - Thông tin tệp upload
+ */
+const uploadVideo = async (filePath) => {
+  try {
+    const result = await cloudinary.uploader.upload(filePath, {
+      folder: "TikTok_Clone/video",
+      resource_type: "video",
+      chunk_size: 20 * 1024 * 1024,
+      // Tạo phiên bản HLS (.m3u8) sau khi upload
+      eager: [
+        { streaming_profile: "hd", format: "m3u8" }, // Chuyển đổi sang HLS
+      ],
+    });
+
+    return {
+      status: 200,
+      code: "OK",
+      data: {
+        public_id: result.public_id,
+        original_url: result.secure_url, // Link gốc MP4
+        hls_url: result.eager[0].secure_url, // Link phát HLS (.m3u8)
+        width: result.width,
+        height: result.height,
+      },
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      code: "ERROR",
+      message: "Internal server error",
+    };
+  } finally {
+    // Xóa file sau khi upload xong/lỗi để tiết kiệm bộ nhớ
+    if (filePath && fs.existsSync(filePath)) {
+      fs.promises
+        .unlink(filePath)
+        .then(() => console.log("Đã xóa file tạm:", filePath))
+        .catch((err) => console.error("Lỗi khi xóa file tạm:", err));
+    }
+  }
+};
+
+const saveVideo = async (video) => {
+  try {
+    const videoSaved = await Video.create(video);
+    return {
+      status: 200,
+      code: "OK",
+      data: videoSaved,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      code: "ERROR",
+      message: "Internal server error",
+    };
+  }
+};
+
 module.exports = {
   recommendedVideos,
   getVideoByFollowing,
   getVideoByPublisherId,
   getVideoUserLiked,
+  uploadVideo,
+  saveVideo,
 };

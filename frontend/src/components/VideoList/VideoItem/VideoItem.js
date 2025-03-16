@@ -6,6 +6,7 @@ import styles from './VideoItem.module.scss';
 import VideoSibar from './VideoSidebar';
 import VideoFooter from './VideoFooter';
 import { VideoContext } from '~/contexts/VideoContext';
+import { useHLS } from '~/hooks';
 
 const cx = classNames.bind(styles);
 
@@ -16,6 +17,8 @@ function VideoItem({ data, isLast, lastVideoElementRef }) {
     const { isMuted, volume } = useContext(VideoContext);
 
     const videoRef = useRef();
+
+    useHLS(videoRef, data.url);
 
     useEffect(() => {
         const handleLoadedMetadata = () => {

@@ -13,7 +13,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--padding);
-    padding: var(--padding);
+    padding-inline: var(--padding);
     background-color: var(--color-background);
 }
 
@@ -22,10 +22,47 @@
     display: flex;
     flex-direction: column;
     border: var(--border-wrapper);
-    border-radius: var(--border-radius);
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
     padding: 24px;
     background-color: white;
 }
+
+.uploading-container,
+.video-wrapper {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: var(--border-radius);
+    background-color: black;
+}
+
+.uploading-container {
+    flex-direction: column;
+}
+
+.uploading-title {
+    color: var(--color-text-secondary);
+}
+
+.video-wrapper video {
+    border-radius: 16px;
+}
+
+.horizontal-wide {
+    width: 680px;
+}
+
+.horizontal-medium {
+    width: 520px;
+}
+
+.square,
+.vertical-medium,
+.vertical-wide {
+    height: 400px;
+}
+
 .upload-container {
     flex: 1;
     display: flex;
@@ -83,9 +120,13 @@
     display: flex;
     justify-content: space-between;
     border: var(--border-wrapper);
-    border-radius: var(--border-radius);
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
     padding: var(--padding);
     background-color: white;
+
+    &.no-btn-change {
+        justify-content: end;
+    }
 }
 
 .right-action {
@@ -100,9 +141,7 @@
 
     input {
         flex: 1;
-        padding-inline: 8px;
-        padding-top: 12px;
-        padding-bottom: 12px;
+        padding: 10px 6% 8px 10px;
         border: 1.5px solid transparent;
         border-radius: var(--border-radius);
         background-color: rgba(22, 24, 35, 0.06);
@@ -125,12 +164,12 @@
 
     .label {
         position: absolute;
-        left: 8px;
+        left: 10px;
         top: 50%;
-        transform: translateY(-50%);
-        color: rgb(126, 125, 125);
+        transform: translateY(calc(-50% + 2px));
+        color: rgb(147, 146, 146);
         font-size: 1.6rem;
-        font-weight: 600;
+        font-weight: 500;
         transition: 0.3s ease;
         pointer-events: none;
     }
@@ -138,8 +177,9 @@
     input:focus,
     input:not(:placeholder-shown) {
         & ~ .label {
-            top: 0;
+            top: -2px;
             font-size: 1.3rem;
+            font-weight: 700;
             color: rgb(72, 71, 71);
 
             &::before {
@@ -153,6 +193,10 @@
             }
         }
     }
+
+    input:disabled {
+        pointer-events: none;
+    }
 }
 
 .btn-clear {
@@ -161,7 +205,7 @@
     top: 50%;
     width: 6%;
     height: 70%;
-    transform: translateY(-50%);
+    transform: translateY(calc(-50% + 2px));
     display: none;
     font-size: 1.6rem;
     color: rgba(22, 24, 35, 0.34);

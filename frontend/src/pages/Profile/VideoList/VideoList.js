@@ -1,22 +1,22 @@
 import classNames from 'classnames';
-
 import VideoItem from './VideoItem';
-
 import styles from './VideoList.module.scss';
 import { useRef, useState } from 'react';
-import Loading from '~/components/Loading';
 
 function VideoList({ data }) {
-    const videoRefs = useRef([]);
+    const videoRefs = useRef([]); // Dùng useRef để lưu danh sách video
 
     const [currentPlaying, setCurrentPlaying] = useState(null);
 
     const handleMouseEnter = (videoRef) => {
+        if (!videoRef) return; // Tránh lỗi nếu ref chưa có giá trị
+
         if (currentPlaying && currentPlaying !== videoRef) {
             currentPlaying.pause();
             currentPlaying.currentTime = 0;
         }
-        videoRef.play();
+
+        videoRef.play().catch((error) => console.error('Video play error:', error));
         setCurrentPlaying(videoRef);
     };
 
@@ -28,7 +28,11 @@ function VideoList({ data }) {
                         <VideoItem
                             key={video._id}
                             data={video}
-                            videoRef={(el) => (videoRefs.current[index] = el)}
+                            setVideoRef={(el) => {
+                                if (el) {
+                                    videoRefs.current[index] = el;
+                                }
+                            }}
                             handleMouseEnter={() => handleMouseEnter(videoRefs.current[index])}
                         />
                     ))}

@@ -92,8 +92,8 @@ const ITEMS_WITH_LOGIN = [
         title: 'Đăng xuất',
         hasTopLine: true,
         onClick() {
-            localStorage.removeItem('access_token');
-            window.location.reload();
+            localStorage.clear();
+            window.location.href = '/';
         },
     },
 ];

@@ -1,4 +1,4 @@
-import { createContext, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 
 export const AuthContext = createContext();
 
@@ -10,12 +10,20 @@ export const AuthProvider = ({ children }) => {
             password: '',
         },
     });
+    const [isLoadingAuth, setIsLoadingAuth] = useState(true);
+
+    useEffect(() => {
+        if (auth.isAuthenticated) {
+            setIsLoadingAuth(false);
+        }
+    }, [auth.isAuthenticated]);
 
     return (
         <AuthContext.Provider
             value={{
                 auth,
                 setAuth,
+                isLoadingAuth,
             }}
         >
             {children}

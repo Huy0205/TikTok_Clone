@@ -12,15 +12,16 @@ import { faEllipsis } from '@fortawesome/free-solid-svg-icons';
 
 import VideoList from './VideoList';
 import Loading from '~/components/Loading';
-import { AuthContext } from '~/contexts';
+import { AuthContext, ModalContext } from '~/contexts';
 
 const cx = classNames.bind(styles);
 
 function Profile() {
     const { tiktokId } = useParams();
 
-    const { auth } = useContext(AuthContext);
-    const { user: userAuth } = auth;
+    const { auth, isLoadingAuth } = useContext(AuthContext);
+    const { user: userAuth, isAuthenticated } = auth;
+    const { openModal } = useContext(ModalContext);
 
     const [user, setUser] = useState({});
     const [activeTab, setActiveTab] = useState('video');
@@ -35,6 +36,13 @@ function Profile() {
         video: useRef(null),
         liked: useRef(null),
     };
+
+    useEffect(() => {
+        if (!isLoadingAuth && !isAuthenticated) {
+            openModal();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isLoadingAuth, isAuthenticated]);
 
     useEffect(() => {
         const currentTab = tabRefs[activeTab].current;
@@ -56,6 +64,7 @@ function Profile() {
 
     useEffect(() => {
         setLoading(true);
+        if (!user.tiktokId) return;
         const fetchVideos = async () => {
             if (activeTab === 'video') {
                 const response = await VideoServices.getVideoByPublisherId(

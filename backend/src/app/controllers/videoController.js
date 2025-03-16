@@ -72,6 +72,7 @@ const handleGetVideoByPublisherId = async (req, res) => {
   const { publisherId, page, limit, sort } = req.query;
 
   if (!publisherId) {
+    console.log("false rổi");
     return res.status(400).json({
       status: 400,
       code: "NOT_ENOUGH_INFO",
@@ -85,6 +86,8 @@ const handleGetVideoByPublisherId = async (req, res) => {
     parseInt(limit),
     sort ? parseInt(sort) : -1
   );
+
+  console.log("test:", response);
 
   return res.status(response.status).json(response);
 };
@@ -121,9 +124,45 @@ const handleGetVideoUserLiked = async (req, res) => {
   return res.status(response.status).json(response);
 };
 
+const handleUploadVideo = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({
+      status: 400,
+      code: "NOT_ENOUGH_INFO",
+      message: "video file is required",
+    });
+  }
+
+  const response = await VideoServices.uploadVideo(req.file.path);
+  return res.status(response.status).json(response);
+};
+
+const handleSaveVideo = async (req, res) => {
+  const { music, publisherId, title, url } = req.body;
+  console.log("req.body", req.body);
+  if (!music || !publisherId || !url) {
+    return res.status(400).json({
+      status: 400,
+      code: "NOT_ENOUGH_INFO",
+      message: "music, publisherId, url is required",
+    });
+  }
+
+  const response = await VideoServices.saveVideo({
+    music,
+    publisherId,
+    title,
+    url,
+    shares: 0,
+  });
+  return res.status(response.status).json(response);
+};
+
 module.exports = {
   handleRecomendedVideos,
   handleGetVideoByFollowing,
   handleGetVideoByPublisherId,
   handleGetVideoUserLiked,
+  handleUploadVideo,
+  handleSaveVideo,
 };
