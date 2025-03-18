@@ -1,9 +1,16 @@
-const multer = require("multer");
+const fs = require("fs");
 const path = require("path");
+const multer = require("multer");
 
-// Cấu hình lưu file tạm vào thư mục "uploads"
+const uploadDir = path.join(__dirname, "../uploads/");
+
+// Kiểm tra & tạo thư mục
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 const storage = multer.diskStorage({
-  destination: path.join(__dirname, "../uploads/"), // Lưu tạm file trước khi up Cloudinary
+  destination: uploadDir,
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     cb(null, uniqueSuffix + path.extname(file.originalname));

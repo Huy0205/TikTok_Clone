@@ -3,11 +3,22 @@ import Modal from '~/components/Modal';
 
 export const ModalContext = createContext();
 
+const redirectAfterModalClose = ['/profile', '/upload'];
+
 export const ModalProvider = ({ children }) => {
     const [showModal, setShowModal] = useState(false);
+    const [locationShow, setLocationShow] = useState(null);
 
-    const openModal = () => setShowModal(true);
-    const closeModal = () => setShowModal(false);
+    const openModal = (location) => {
+        setShowModal(true);
+        setLocationShow(location);
+    };
+    const closeModal = () => {
+        if (redirectAfterModalClose.includes(locationShow)) {
+            window.location.href = '/';
+        }
+        setShowModal(false);
+    };
 
     console.log('ModalProvider', showModal);
 

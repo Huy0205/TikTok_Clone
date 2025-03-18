@@ -9,10 +9,13 @@ import Menu from './Menu/Menu';
 import Button from '~/components/Button';
 import images from '~/assets/images';
 import AccountItem from '~/components/AccountItem';
+import { useLocation } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
 function Sidebar() {
+    const location = useLocation();
+
     const { openModal } = useContext(ModalContext);
     const { auth } = useContext(AuthContext);
     const { isAuthenticated } = auth;
@@ -38,6 +41,10 @@ function Sidebar() {
         setPage(page + 1);
     };
 
+    const handleClickLogin = () => {
+        openModal(location.pathname);
+    };
+
     return (
         <aside className={cx('wrapper')}>
             <Menu />
@@ -46,7 +53,7 @@ function Sidebar() {
             ) : (
                 <div className={cx('login-wrapper')}>
                     <p className={cx('login-tip')}>Đăng nhập để follow các tác giả, thích video và xem bình luận.</p>
-                    <Button size="large" borderPrimary onClick={openModal}>
+                    <Button size="large" borderPrimary onClick={handleClickLogin}>
                         <span className={cx('text-login-btn')}>Đăng nhập</span>
                     </Button>
                 </div>

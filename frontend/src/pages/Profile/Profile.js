@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import classNames from 'classnames/bind';
 
 import styles from './Profile.module.scss';
@@ -18,6 +18,8 @@ const cx = classNames.bind(styles);
 
 function Profile() {
     const { tiktokId } = useParams();
+
+    const navigate = useNavigate();
 
     const { auth, isLoadingAuth } = useContext(AuthContext);
     const { user: userAuth, isAuthenticated } = auth;
@@ -39,8 +41,9 @@ function Profile() {
 
     useEffect(() => {
         if (!isLoadingAuth && !isAuthenticated) {
-            openModal();
+            openModal('/profile');
         }
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoadingAuth, isAuthenticated]);
 
@@ -55,9 +58,9 @@ function Profile() {
 
     useEffect(() => {
         const fetchUser = async () => {
-            const cleanedTiktokId = tiktokId.startsWith('@') ? tiktokId.slice(1) : tiktokId;
-            const response = await UserServices.getUserByTiktokId(cleanedTiktokId);
+            const response = await UserServices.getUserByTiktokId(tiktokId.slice(1));
             if (response.code === 'OK') setUser(response.data);
+            else navigate(-1);
         };
         fetchUser();
     }, [tiktokId]);
@@ -125,6 +128,13 @@ function Profile() {
             if (response.code === 'OK') setFollowed(false);
         }
     };
+
+    if (!user)
+        return (
+            <div className={cx('loading')}>
+                <Loading />
+            </div>
+        );
 
     return (
         <div className={cx('wrapper')}>

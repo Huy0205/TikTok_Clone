@@ -1,9 +1,13 @@
+const fs = require("fs");
+
 const {
   VideoServices,
   WatchHistoryServices,
   LikeServices,
   FollowServices,
 } = require("../services");
+const { hashVideo } = require("../../utils");
+const { Types } = require("mongoose");
 
 const handleRecomendedVideos = async (req, res) => {
   const { currentTiktokId, page, limit } = req.query;
@@ -11,7 +15,7 @@ const handleRecomendedVideos = async (req, res) => {
   const watchHistorysRes =
     await WatchHistoryServices.findWatchHistoryByWatcherId(currentTiktokId);
 
-  const likesRes = await LikeServices.findLikesByLikerId(currentTiktokId);
+  const likesRes = await LikeServices.getLikesByLikerId(currentTiktokId);
 
   if (watchHistorysRes.code !== "OK" || likesRes.code !== "OK") {
     return res.status(500).json({
@@ -22,10 +26,10 @@ const handleRecomendedVideos = async (req, res) => {
   }
 
   const watchHistorys = watchHistorysRes.data.map(
-    (watchHistory) => watchHistory.videoId
+    (watchHistory) => new Types.ObjectId(watchHistory.videoId)
   );
 
-  const likes = likesRes.data.map((like) => like.videoId);
+  const likes = likesRes.data.map((like) => new Types.ObjectId(like.videoId));
 
   const response = await VideoServices.recommendedVideos(
     currentTiktokId,
@@ -72,7 +76,6 @@ const handleGetVideoByPublisherId = async (req, res) => {
   const { publisherId, page, limit, sort } = req.query;
 
   if (!publisherId) {
-    console.log("false rổi");
     return res.status(400).json({
       status: 400,
       code: "NOT_ENOUGH_INFO",
@@ -86,9 +89,6 @@ const handleGetVideoByPublisherId = async (req, res) => {
     parseInt(limit),
     sort ? parseInt(sort) : -1
   );
-
-  console.log("test:", response);
-
   return res.status(response.status).json(response);
 };
 
@@ -103,7 +103,7 @@ const handleGetVideoUserLiked = async (req, res) => {
     });
   }
 
-  const likesRes = await LikeServices.findLikesByLikerId(userId);
+  const likesRes = await LikeServices.getLikesByLikerId(userId);
   if (likesRes.code !== "OK") {
     return res.status(500).json({
       status: 500,
@@ -125,7 +125,9 @@ const handleGetVideoUserLiked = async (req, res) => {
 };
 
 const handleUploadVideo = async (req, res) => {
-  if (!req.file) {
+  const { file } = req;
+
+  if (!file) {
     return res.status(400).json({
       status: 400,
       code: "NOT_ENOUGH_INFO",
@@ -133,18 +135,70 @@ const handleUploadVideo = async (req, res) => {
     });
   }
 
-  const response = await VideoServices.uploadVideo(req.file.path);
+  // Kiểm tra video trùng
+  const hash = await hashVideo(file.path);
+  const videoByHashRes = await VideoServices.getVideoByHash(hash);
+  if (videoByHashRes.data) {
+    fs.unlinkSync(file.path);
+    return res.status(200).json({
+      status: 200,
+      code: "NONE_UPLOAD",
+      data: {
+        cloudinary_public_id: videoByHashRes.data.cloudinary_public_id,
+        original_url: videoByHashRes.data.original_url, // Link gốc MP4
+        hls_url: videoByHashRes.data.hls_url, // Link phát HLS (.m3u8)
+        width: videoByHashRes.data.width,
+        height: videoByHashRes.data.height,
+        music: videoByHashRes.data.music,
+        hash: videoByHashRes.data.hash,
+      },
+    });
+  }
+
+  const response = await VideoServices.uploadVideo(file.path, hash);
   return res.status(response.status).json(response);
 };
 
 const handleSaveVideo = async (req, res) => {
-  const { music, publisherId, title, url } = req.body;
-  console.log("req.body", req.body);
-  if (!music || !publisherId || !url) {
+  const {
+    music,
+    publisherId,
+    title,
+    cloudinary_public_id,
+    original_url,
+    hls_url,
+    width,
+    height,
+    hash,
+  } = req.body;
+  if (
+    !music ||
+    !publisherId ||
+    !cloudinary_public_id ||
+    !original_url ||
+    !hls_url ||
+    !width ||
+    !height ||
+    !hash
+  ) {
     return res.status(400).json({
       status: 400,
       code: "NOT_ENOUGH_INFO",
-      message: "music, publisherId, url is required",
+      message:
+        "music, publisherId, cloudinary_public_id, original_url, hls_url, width, height, hash is required",
+    });
+  }
+
+  // Kiểm tra xem người đăng đã đăng video này chưa
+  const videoRes = await VideoServices.getVideoByHashAndPublisherId(
+    hash,
+    publisherId
+  );
+  if (videoRes.data) {
+    return res.status(409).json({
+      status: 409,
+      code: "DUPLICATE_VIDEO",
+      message: "You have already uploaded this video before.",
     });
   }
 
@@ -152,7 +206,12 @@ const handleSaveVideo = async (req, res) => {
     music,
     publisherId,
     title,
-    url,
+    cloudinary_public_id,
+    original_url,
+    hls_url,
+    width,
+    height,
+    hash,
     shares: 0,
   });
   return res.status(response.status).json(response);

@@ -17,6 +17,7 @@ const currentYear = new Date().getFullYear();
 
 function Modal() {
     const { showModal, closeModal } = useContext(ModalContext);
+
     const [screen, setScreen] = useState('login');
     const [showPassword, setShowPassword] = useState(false);
     const [days, setDays] = useState([...Array(31).keys()]);

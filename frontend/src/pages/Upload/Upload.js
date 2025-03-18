@@ -10,6 +10,8 @@ import Button from '~/components/Button';
 import { VideoServices } from '~/services';
 import { AuthContext, ModalContext } from '~/contexts';
 import { useHLS } from '~/hooks';
+import { toast } from 'react-toastify';
+import { getVideoOrientation } from '~/util/videoOrientation';
 
 const cx = classNames.bind(styles);
 
@@ -41,30 +43,35 @@ function Upload() {
     const { isAuthenticated, user } = auth;
     const { openModal } = useContext(ModalContext);
 
-    const [title, setTitle] = useState('');
-    const [videoUrl, setVideoUrl] = useState(null);
-    const [videoOrientation, setVideoOrientation] = useState('vertical');
+    const [dataVideo, setDataVideo] = useState(null);
+    const [videoOrientation, setVideoOrientation] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
     const [publishing, setPublishing] = useState(false);
 
     const inputRef = useRef(null);
     const videoRef = useRef();
 
-    useHLS(videoRef, videoUrl);
+    useHLS(videoRef, dataVideo?.hls_url);
 
     useEffect(() => {
         if (!isAuthenticated && !isLoadingAuth) {
-            openModal();
+            openModal('/upload');
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoadingAuth, isAuthenticated]);
 
     const handleChangeTitle = (e) => {
-        setTitle(e.target.value);
+        setDataVideo((prev) => ({
+            ...prev,
+            title: e.target.value,
+        }));
     };
 
     const handleClearTitle = () => {
-        setTitle('');
+        setDataVideo((prev) => ({
+            ...prev,
+            title: '',
+        }));
     };
 
     const isValidVideo = (file) => {
@@ -78,23 +85,23 @@ function Upload() {
     const uploadVideo = async (videoFile) => {
         setIsUploading(true);
 
-        const uploadRes = await VideoServices.uploadVideo(videoFile);
+        if (videoFile.size <= 500 * 1024 * 1024) {
+            const uploadRes = await VideoServices.uploadVideo(videoFile);
 
-        if (uploadRes.code === 'OK') {
-            const { data } = uploadRes;
-            setVideoUrl(data.hls_url);
-            const ratio = data.width / data.height;
-
-            let orientation = 'square'; // Mặc định là vuông
-            if (ratio >= 1.7) orientation = 'horizontal-wide'; // Rộng nhiều
-            else if (ratio >= 1.3) orientation = 'horizontal-medium'; // Rộng vừa
-            else if (ratio >= 0.8) orientation = 'square'; // Vuông
-            else if (ratio >= 0.6) orientation = 'vertical-medium'; // Dọc vừa
-            else orientation = 'vertical-wide'; // Dọc nhiều
-
-            setVideoOrientation(orientation);
-            setTitle(videoFile.name.split('.')[0]);
+            if (uploadRes.code === 'OK' || uploadRes.code === 'NONE_UPLOAD') {
+                const { data } = uploadRes;
+                const orientation = getVideoOrientation(data.width, data.height);
+                setVideoOrientation(orientation);
+                setDataVideo((prev) => ({
+                    ...prev,
+                    ...data,
+                    title: videoFile.name.split('.')[0],
+                }));
+            } else {
+                toast.error('Có lỗi xảy ra, vui lòng thử lại sau!');
+            }
         } else {
+            toast.error('Video không được vượt quá 500MB!');
         }
 
         setIsUploading(false);
@@ -107,7 +114,7 @@ function Upload() {
             if (isValidVideo(files[0])) {
                 uploadVideo(files[0]);
             } else {
-                console.log('Vui lòng chọn một file video hợp lệ.');
+                toast.error('Vui lòng chọn một file video hợp lệ.');
             }
         }
     };
@@ -121,27 +128,27 @@ function Upload() {
         if (isValidVideo(file)) {
             uploadVideo(file);
         } else {
-            console.log('Vui lòng chọn một file video hợp lệ.');
+            toast.error('Vui lòng chọn một file video hợp lệ.');
         }
     };
 
     const handlePublish = async () => {
         setPublishing(true);
+        const { music } = dataVideo;
+        console.log(dataVideo);
         const saveRes = await VideoServices.saveVideo({
-            music: 'nhạc nền - ' + user.nickname,
+            ...dataVideo,
             publisherId: user.tiktokId,
-            title,
-            url: videoUrl,
+            music: music || 'nhạc nền - ' + user.nickname,
         });
         if (saveRes.code === 'OK') {
-            setVideoUrl(null);
-            setTitle('');
+            setDataVideo(null);
+        } else if (saveRes.code === 'DUPLICATE_VIDEO') {
+            toast.warning('Bạn đã đăng video này rồi!');
         } else {
-            console.log('Có lỗi xảy ra');
+            toast.error('Có lỗi xảy ra, vui lòng thử lại sau!');
         }
-        setTimeout(() => {
-            setPublishing(false);
-        }, 3000);
+        setPublishing(false);
     };
 
     return (
@@ -152,7 +159,7 @@ function Upload() {
                         <h3 className={cx('uploading-title')}>Đang tải video lên</h3>
                         <ReactLoading type="balls" color="gray" height={8} width={30} />
                     </div>
-                ) : videoUrl ? (
+                ) : dataVideo?.hls_url ? (
                     <div className={cx('video-wrapper')}>
                         <div className={cx(videoOrientation)}>
                             <video controls width="100%" height="100%" ref={videoRef} />
@@ -194,8 +201,8 @@ function Upload() {
                     ))}
                 </div>
             </div>
-            <div className={cx('action', (!videoUrl || publishing) && 'no-btn-change')}>
-                {videoUrl && !publishing && (
+            <div className={cx('action', (!dataVideo?.hls_url || publishing) && 'no-btn-change')}>
+                {dataVideo?.hls_url && !publishing && (
                     <>
                         <Button bgSecondary className={cx('btn-custom')} onClick={handleSelectFile}>
                             Thay thế
@@ -212,9 +219,9 @@ function Upload() {
                 <div className={cx('right-action')}>
                     <div className={cx('input-container')}>
                         <input
-                            value={title}
+                            value={dataVideo?.title || ''}
                             placeholder=""
-                            disabled={!videoUrl || publishing}
+                            disabled={!dataVideo?.hls_url || publishing}
                             onChange={handleChangeTitle}
                         />
                         <button className={cx('btn-clear')} onClick={handleClearTitle}>
@@ -224,7 +231,7 @@ function Upload() {
                     </div>
                     <Button
                         bgPrimary
-                        disable={!videoUrl || publishing}
+                        disable={!dataVideo?.hls_url || publishing}
                         className={cx('btn-custom')}
                         onClick={handlePublish}
                     >

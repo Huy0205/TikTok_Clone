@@ -1,6 +1,7 @@
 const fs = require("fs");
 const { cloudinary } = require("../../config");
 const Video = require("../models/video");
+const { connect } = require("tls");
 
 /**
  * @param { ID của người dùng đang đăng nhập } watcherId
@@ -148,12 +149,50 @@ const getVideoUserLiked = async (likes, page = 1, limit = 10, sort = -1) => {
   }
 };
 
+const getVideoByHash = async (hash) => {
+  try {
+    const videos = await Video.find({ hash }).sort({ createdAt: 1 }).limit(1);
+    return {
+      status: 200,
+      code: "OK",
+      data: videos.length > 0 ? videos[0] : null,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      code: "ERROR",
+      message: "Internal server error",
+    };
+  }
+};
+
+const getVideoByHashAndPublisherId = async (hash, publisherId) => {
+  try {
+    const videos = await Video.find({ hash, publisherId })
+      .sort({ createdAt: 1 })
+      .limit(1);
+    return {
+      status: 200,
+      code: "OK",
+      data: videos.length > 0 ? videos[0] : null,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      code: "ERROR",
+      message: "Internal server error",
+    };
+  }
+};
+
 /**
  * Upload file lên Cloudinary
  * @param {string} filePath - Đường dẫn tệp cần upload
  * @returns {Promise<Object>} - Thông tin tệp upload
  */
-const uploadVideo = async (filePath) => {
+const uploadVideo = async (filePath, hash) => {
   try {
     const result = await cloudinary.uploader.upload(filePath, {
       folder: "TikTok_Clone/video",
@@ -169,11 +208,12 @@ const uploadVideo = async (filePath) => {
       status: 200,
       code: "OK",
       data: {
-        public_id: result.public_id,
+        cloudinary_public_id: result.public_id,
         original_url: result.secure_url, // Link gốc MP4
         hls_url: result.eager[0].secure_url, // Link phát HLS (.m3u8)
         width: result.width,
         height: result.height,
+        hash,
       },
     };
   } catch (error) {
@@ -217,6 +257,8 @@ module.exports = {
   getVideoByFollowing,
   getVideoByPublisherId,
   getVideoUserLiked,
+  getVideoByHash,
+  getVideoByHashAndPublisherId,
   uploadVideo,
   saveVideo,
 };

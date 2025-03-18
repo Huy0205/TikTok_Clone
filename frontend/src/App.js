@@ -1,17 +1,16 @@
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { publicRoutes } from '~/routes/routes';
 import DefaultLayout from '~/layouts';
 import { UserServices } from '~/services';
 import { AuthContext } from '~/contexts/AuthContext';
 import Loading from './components/Loading';
+import { ToastContainer } from 'react-toastify';
 
 function App() {
-    const [loading, setLoading] = useState(false);
-    const { setAuth } = useContext(AuthContext);
+    const { setAuth, isLoadingAuth, setIsLoadingAuth } = useContext(AuthContext);
 
     useEffect(() => {
-        setLoading(true);
         const fetchAccount = async () => {
             const response = await UserServices.getAccount();
             if (response.code === 'TOKEN_EXPIRED' || response.code === 'UNAUTHORIZED') {
@@ -22,13 +21,13 @@ function App() {
                     user: response.data,
                 });
             }
-            setLoading(false);
+            setIsLoadingAuth(false);
         };
         fetchAccount();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    if (loading)
+    if (isLoadingAuth)
         return (
             <div style={{ height: '100vh' }}>
                 <Loading />
@@ -51,6 +50,7 @@ function App() {
                             element={
                                 <Layout>
                                     <Page />
+                                    <ToastContainer />
                                 </Layout>
                             }
                         />

@@ -1,5 +1,5 @@
 import { useContext, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import classNames from 'classnames/bind';
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
@@ -99,6 +99,8 @@ const ITEMS_WITH_LOGIN = [
 ];
 
 function Header() {
+    const location = useLocation();
+
     const { openModal } = useContext(ModalContext);
     const { auth } = useContext(AuthContext);
     const { isAuthenticated, user } = auth;
@@ -106,7 +108,7 @@ function Header() {
     const headerRef = useRef();
 
     const handleClickLogin = () => {
-        openModal();
+        openModal(location.pathname);
     };
 
     return (
