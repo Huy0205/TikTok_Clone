@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { memo, useContext, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames/bind';
 
@@ -14,6 +14,7 @@ const cx = classNames.bind(styles);
 function VideoItem({ data, isLast, lastVideoElementRef }) {
     const [videoOrientation, setVideoOrientation] = useState(null);
     const [hover, setHover] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     const { isMuted, volume } = useContext(VideoContext);
 
@@ -26,17 +27,20 @@ function VideoItem({ data, isLast, lastVideoElementRef }) {
             const orientation = getVideoOrientation(data.width, data.height);
             setVideoOrientation(orientation);
         }
-    }, [data.height, data.width]);
+    }, [data.width, data.height]);
 
     useEffect(() => {
         const handlePlay = () => {
-            if (videoRef.current) {
-                videoRef.current.play();
+            if (videoRef.current && videoRef.current.paused) {
+                videoRef.current
+                    .play()
+                    .then(() => console.log('playing'))
+                    .catch(() => console.log('error'));
             }
         };
 
         const handlePause = () => {
-            if (videoRef.current) {
+            if (videoRef.current && !videoRef.current.paused) {
                 videoRef.current.pause();
             }
         };
@@ -82,6 +86,12 @@ function VideoItem({ data, isLast, lastVideoElementRef }) {
         }
     }, [isMuted, volume]);
 
+    const getThumbnailUrl = (videoUrl) => {
+        if (!videoUrl) return '';
+
+        return videoUrl.replace('/video/upload/sp_hd/', '/video/upload/so_0/').replace('.m3u8', '.jpg');
+    };
+
     return (
         <div className={cx('video-item-wrapper', videoOrientation)} ref={isLast ? lastVideoElementRef : null}>
             <div
@@ -89,14 +99,25 @@ function VideoItem({ data, isLast, lastVideoElementRef }) {
                 onMouseEnter={() => setHover(true)}
                 onMouseLeave={() => setHover(false)}
             >
-                <video ref={videoRef} className={cx('video')} muted={isMuted} loop preload="auto" playsInline />
-                <VideoFooter
-                    videoRef={videoRef}
-                    hoverVideo={hover}
-                    publisherId={data.publisherId}
-                    music={data.music}
-                    title={data.title}
+                <video
+                    ref={videoRef}
+                    className={cx('video')}
+                    muted={isMuted}
+                    poster={getThumbnailUrl(data.hls_url)}
+                    loop
+                    preload="auto"
+                    playsInline
+                    onLoadedData={() => setLoading(false)}
                 />
+                {!loading && (
+                    <VideoFooter
+                        videoRef={videoRef}
+                        hoverVideo={hover}
+                        publisherId={data.publisherId}
+                        music={data.music}
+                        title={data.title}
+                    />
+                )}
             </div>
             <VideoSibar videoId={data._id} publisherId={data.publisherId} shares={data.shares} />
         </div>
@@ -109,4 +130,4 @@ VideoItem.propTypes = {
     lastVideoElementRef: PropTypes.func.isRequired,
 };
 
-export default VideoItem;
+export default memo(VideoItem);

@@ -5,11 +5,10 @@ const express = require("express");
 const { mongoDB } = require("./config");
 const routes = require("./routes");
 const http = require("http");
-const socketHandler = require("./socket");
+const { initSocket } = require("./socket");
 
 const app = express();
 const server = http.createServer(app);
-socketHandler(server);
 const port = process.env.PORT || 3000;
 
 app.use(cors());
@@ -19,6 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
 mongoDB.connect();
+initSocket(server);
 
 app.use("/api/v1", routes);
 

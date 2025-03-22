@@ -63,28 +63,31 @@ async function hashAudio(audioPath) {
 }
 
 // Hàm hash toàn bộ video
-async function hashVideo(videoPath) {
+const hashVideo = async (videoBuffer) => {
   try {
+    // Lưu buffer thành file tạm vì FFmpeg cần đường dẫn file
+    const tempVideoPath = path.join(__dirname, "../uploads", `video_${Date.now()}.mp4`);
+    ensureDirExists("../uploads");
+    fs.writeFileSync(tempVideoPath, videoBuffer);
+
     // Tạo frame hash
     const frameName = `frame_${Date.now()}.jpg`;
     const framePath = path.join(__dirname, "../uploads/frames");
-    await extractFrame(videoPath, 5, framePath, frameName);
+    await extractFrame(tempVideoPath, 5, framePath, frameName);
     const imageHash = await hashImage(path.join(framePath, frameName));
     fs.unlinkSync(path.join(framePath, frameName));
 
     // Tạo audio hash
-    const audioPath = path.join(
-      __dirname,
-      "../uploads/audios",
-      `audio_${Date.now()}.aac`
-    );
-    await extractAudio(videoPath, audioPath);
+    const audioPath = path.join(__dirname, "../uploads/audios", `audio_${Date.now()}.aac`);
+    await extractAudio(tempVideoPath, audioPath);
     const audioHash = await hashAudio(audioPath);
     fs.unlinkSync(audioPath);
 
+    // Xóa file video tạm
+    fs.unlinkSync(tempVideoPath);
+
     // Gộp hash ảnh + âm thanh, sau đó hash lại bằng SHA-256
-    const combinedHash = crypto
-      .createHash("sha256")
+    const combinedHash = crypto.createHash("sha256")
       .update(imageHash + audioHash)
       .digest("hex");
 
@@ -93,6 +96,7 @@ async function hashVideo(videoPath) {
     console.error("Lỗi khi hash video:", error);
     return null;
   }
-}
+};
+
 
 module.exports = hashVideo;

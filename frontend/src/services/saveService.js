@@ -1,8 +1,8 @@
 import axios from '../util/axios.customize';
 
-export const countLikesByVideoId = async (videoId) => {
+export const countSavesByVideoId = async (videoId) => {
     try {
-        const res = await axios.get('/like/count-by-videoId', { params: { videoId } });
+        const res = await axios.get('/save/count-by-videoId', { params: { videoId } });
         return res;
     } catch (error) {
         console.error(error);
@@ -10,9 +10,9 @@ export const countLikesByVideoId = async (videoId) => {
     }
 };
 
-export const addOne = async (like) => {
+export const addOne = async (save) => {
     try {
-        const res = await axios.post('/like/save', like);
+        const res = await axios.post('/save/add', save);
         return res;
     } catch (error) {
         console.error(error);
@@ -20,9 +20,9 @@ export const addOne = async (like) => {
     }
 };
 
-export const deleteOne = async (likeId) => {
+export const deleteOne = async (saveId) => {
     try {
-        const res = await axios.delete('/like/delete', { params: { likeId } });
+        const res = await axios.delete('/save/delete', { params: { saveId } });
         return res;
     } catch (error) {
         console.error(error);

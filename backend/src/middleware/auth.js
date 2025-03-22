@@ -15,6 +15,7 @@ const auth = (req, res, next) => {
     "/video/liked",
     "/follow/countOfUser",
     "/like/count-by-videoId",
+    "/save/count-by-videoId",
   ];
   if (whiteList.includes(req.path)) {
     return next();

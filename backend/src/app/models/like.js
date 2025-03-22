@@ -8,8 +8,6 @@ const likeSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-likeSchema.index({ likerId: 1 });
-likeSchema.index({ videoId: 1 });
 likeSchema.index({ likerId: 1, videoId: 1 }, { unique: true });
 
 const Like = mongoose.model("Like", likeSchema);

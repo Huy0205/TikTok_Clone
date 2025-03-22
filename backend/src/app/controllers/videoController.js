@@ -1,23 +1,28 @@
-const fs = require("fs");
-
 const {
   VideoServices,
   WatchHistoryServices,
   LikeServices,
   FollowServices,
+  SaveServices,
 } = require("../services");
 const { hashVideo } = require("../../utils");
 const { Types } = require("mongoose");
+const { emitOne } = require("../../socket");
 
 const handleRecomendedVideos = async (req, res) => {
   const { currentTiktokId, page, limit } = req.query;
 
-  const watchHistorysRes =
-    await WatchHistoryServices.findWatchHistoryByWatcherId(currentTiktokId);
+  const [watchHistorysRes, likesRes, savesRes] = await Promise.all([
+    WatchHistoryServices.findWatchHistoryByWatcherId(currentTiktokId),
+    LikeServices.getLikesByLikerId(currentTiktokId),
+    SaveServices.getSavesBySaverId(currentTiktokId),
+  ]);
 
-  const likesRes = await LikeServices.getLikesByLikerId(currentTiktokId);
-
-  if (watchHistorysRes.code !== "OK" || likesRes.code !== "OK") {
+  if (
+    watchHistorysRes.code !== "OK" ||
+    likesRes.code !== "OK" ||
+    savesRes.code !== "OK"
+  ) {
     return res.status(500).json({
       status: 500,
       code: "ERROR",
@@ -28,13 +33,14 @@ const handleRecomendedVideos = async (req, res) => {
   const watchHistorys = watchHistorysRes.data.map(
     (watchHistory) => new Types.ObjectId(watchHistory.videoId)
   );
-
   const likes = likesRes.data.map((like) => new Types.ObjectId(like.videoId));
+  const saves = savesRes.data.map((save) => new Types.ObjectId(save.videoId));
 
   const response = await VideoServices.recommendedVideos(
     currentTiktokId,
     watchHistorys,
     likes,
+    saves,
     parseInt(page),
     parseInt(limit)
   );
@@ -93,17 +99,17 @@ const handleGetVideoByPublisherId = async (req, res) => {
 };
 
 const handleGetVideoUserLiked = async (req, res) => {
-  const { userId, page, limit, sort } = req.query;
+  const { tiktokId, page, limit, sort } = req.query;
 
-  if (!userId) {
+  if (!tiktokId) {
     return res.status(400).json({
       status: 400,
       code: "NOT_ENOUGH_INFO",
-      message: "userId is required",
+      message: "tiktokId is required",
     });
   }
 
-  const likesRes = await LikeServices.getLikesByLikerId(userId);
+  const likesRes = await LikeServices.getLikesByLikerId(tiktokId);
   if (likesRes.code !== "OK") {
     return res.status(500).json({
       status: 500,
@@ -112,9 +118,9 @@ const handleGetVideoUserLiked = async (req, res) => {
     });
   }
 
-  const likes = likesRes.data.map((like) => like.videoId);
+  const likes = likesRes.data.map((like) => new Types.ObjectId(like.videoId));
 
-  const response = await VideoServices.getVideoUserLiked(
+  const response = await VideoServices.getVideoUserLikedOrSaved(
     likes,
     parseInt(page),
     parseInt(limit),
@@ -124,22 +130,56 @@ const handleGetVideoUserLiked = async (req, res) => {
   return res.status(response.status).json(response);
 };
 
-const handleUploadVideo = async (req, res) => {
-  const { file } = req;
+const handleGetVideoUserSaved = async (req, res) => {
+  const { tiktokId, page, limit, sort } = req.query;
 
-  if (!file) {
+  if (!tiktokId) {
     return res.status(400).json({
       status: 400,
       code: "NOT_ENOUGH_INFO",
-      message: "video file is required",
+      message: "userId is required",
+    });
+  }
+
+  const savesRes = await SaveServices.getSavesBySaverId(tiktokId);
+  if (savesRes.code !== "OK") {
+    return res.status(500).json({
+      status: 500,
+      code: "ERROR",
+      message: "Internal server error",
+    });
+  }
+
+  const saves = savesRes.data.map((save) => new Types.ObjectId(save.videoId));
+
+  const response = await VideoServices.getVideoUserLikedOrSaved(
+    saves,
+    parseInt(page),
+    parseInt(limit),
+    parseInt(sort)
+  );
+
+  return res.status(response.status).json(response);
+};
+
+const handleUploadVideo = async (req, res) => {
+  const { file, user } = req;
+
+  if (!file || !user) {
+    return res.status(400).json({
+      status: 400,
+      code: "NOT_ENOUGH_INFO",
+      message: "video file, user is required",
     });
   }
 
   // Kiểm tra video trùng
-  const hash = await hashVideo(file.path);
+  const hash = await hashVideo(file.buffer);
+  emitOne(user.tiktokId, "uploadProgress", { progress: 5 });
   const videoByHashRes = await VideoServices.getVideoByHash(hash);
+  emitOne(user.tiktokId, "uploadProgress", { progress: 15 });
   if (videoByHashRes.data) {
-    fs.unlinkSync(file.path);
+    emitOne(user.tiktokId, "uploadProgress", { progress: 100 });
     return res.status(200).json({
       status: 200,
       code: "NONE_UPLOAD",
@@ -155,7 +195,11 @@ const handleUploadVideo = async (req, res) => {
     });
   }
 
-  const response = await VideoServices.uploadVideo(file.path, hash);
+  const response = await VideoServices.uploadVideo(
+    file.buffer,
+    hash,
+    user.tiktokId
+  );
   return res.status(response.status).json(response);
 };
 
@@ -222,6 +266,7 @@ module.exports = {
   handleGetVideoByFollowing,
   handleGetVideoByPublisherId,
   handleGetVideoUserLiked,
+  handleGetVideoUserSaved,
   handleUploadVideo,
   handleSaveVideo,
 };

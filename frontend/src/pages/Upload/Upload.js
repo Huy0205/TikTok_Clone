@@ -8,7 +8,7 @@ import images from '~/assets/images';
 import styles from './Upload.module.scss';
 import Button from '~/components/Button';
 import { VideoServices } from '~/services';
-import { AuthContext, ModalContext } from '~/contexts';
+import { AuthContext, ModalContext, SocketContext } from '~/contexts';
 import { useHLS } from '~/hooks';
 import { toast } from 'react-toastify';
 import { getVideoOrientation } from '~/util/videoOrientation';
@@ -42,11 +42,13 @@ function Upload() {
     const { auth, isLoadingAuth } = useContext(AuthContext);
     const { isAuthenticated, user } = auth;
     const { openModal } = useContext(ModalContext);
+    const socket = useContext(SocketContext);
 
     const [dataVideo, setDataVideo] = useState(null);
     const [videoOrientation, setVideoOrientation] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
     const [publishing, setPublishing] = useState(false);
+    const [progress, setProgress] = useState(0);
 
     const inputRef = useRef(null);
     const videoRef = useRef();
@@ -59,6 +61,18 @@ function Upload() {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoadingAuth, isAuthenticated]);
+
+    useEffect(() => {
+        if (!socket) return;
+
+        socket.on('uploadProgress', ({ progress }) => {
+            setProgress(progress);
+        });
+
+        return () => {
+            socket.off('uploadProgress');
+        };
+    }, [socket]);
 
     const handleChangeTitle = (e) => {
         setDataVideo((prev) => ({
@@ -90,6 +104,7 @@ function Upload() {
 
             if (uploadRes.code === 'OK' || uploadRes.code === 'NONE_UPLOAD') {
                 const { data } = uploadRes;
+                console.log('data upload', data);
                 const orientation = getVideoOrientation(data.width, data.height);
                 setVideoOrientation(orientation);
                 setDataVideo((prev) => ({
@@ -100,6 +115,7 @@ function Upload() {
             } else {
                 toast.error('Có lỗi xảy ra, vui lòng thử lại sau!');
             }
+            setProgress(0);
         } else {
             toast.error('Video không được vượt quá 500MB!');
         }
@@ -157,7 +173,12 @@ function Upload() {
                 {isUploading ? (
                     <div className={cx('uploading-container')}>
                         <h3 className={cx('uploading-title')}>Đang tải video lên</h3>
-                        <ReactLoading type="balls" color="gray" height={8} width={30} />
+                        <div className={cx('progress-wrapper')}>
+                            <div className={cx('progress-container')}>
+                                <div className={cx('progress')} style={{ width: `${progress * 3}px` }} />
+                            </div>
+                            <span>{progress}%</span>
+                        </div>
                     </div>
                 ) : dataVideo?.hls_url ? (
                     <div className={cx('video-wrapper')}>

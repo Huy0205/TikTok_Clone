@@ -16,6 +16,7 @@ function Home() {
     const observer = useRef();
     const lastVideoElementRef = useCallback(
         (node) => {
+            console.log(node);
             if (loading) return;
             if (observer.current) observer.current.disconnect();
             observer.current = new IntersectionObserver((entries) => {
@@ -31,7 +32,7 @@ function Home() {
     useEffect(() => {
         setLoading(true);
         const fetchRecommendedVideos = async () => {
-            const res = await VideoServices.recommendedVideos(auth.user.tiktokId, page, 10);
+            const res = await VideoServices.recommendedVideos(auth.user.tiktokId, page, 5);
             if (res.code === 'OK') {
                 setData((prev) => [...prev, ...res.data]);
                 setHasMore(res.data.length > 0);

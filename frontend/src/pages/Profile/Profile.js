@@ -37,6 +37,7 @@ function Profile() {
     const tabRefs = {
         video: useRef(null),
         liked: useRef(null),
+        saved: useRef(null),
     };
 
     useEffect(() => {
@@ -68,26 +69,23 @@ function Profile() {
     useEffect(() => {
         setLoading(true);
         if (!user.tiktokId) return;
+
         const fetchVideos = async () => {
-            if (activeTab === 'video') {
-                const response = await VideoServices.getVideoByPublisherId(
-                    user.tiktokId,
-                    1,
-                    8,
-                    sortOption === 'new' ? -1 : 1,
-                );
-                if (response.code === 'OK') setVideos(response.data);
-            } else {
-                const response = await VideoServices.getVideoUserLiked(
-                    user.tiktokId,
-                    1,
-                    10,
-                    sortOption === 'new' ? -1 : 1,
-                );
-                if (response.code === 'OK') setVideos(response.data);
-            }
+            const apiMap = {
+                video: VideoServices.getVideoByPublisherId,
+                liked: VideoServices.getVideoUserLiked,
+                saved: VideoServices.getVideoUserSaved,
+            };
+
+            const fetchFunction = apiMap[activeTab];
+            if (!fetchFunction) return;
+
+            const response = await fetchFunction(user.tiktokId, 1, 8, sortOption === 'new' ? -1 : 1);
+            if (response.code === 'OK') setVideos(response.data);
+
             setLoading(false);
         };
+
         fetchVideos();
     }, [activeTab, sortOption, user.tiktokId]);
 
@@ -224,6 +222,13 @@ function Profile() {
                                 onClick={() => setActiveTab('liked')}
                             >
                                 Đã thích
+                            </p>
+                            <p
+                                ref={tabRefs.saved}
+                                aria-selected={activeTab === 'saved'}
+                                onClick={() => setActiveTab('saved')}
+                            >
+                                Đã lưu
                             </p>
                             <div className={cx('underline')} style={indicatorStyle}></div>
                         </div>

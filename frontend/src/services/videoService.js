@@ -33,9 +33,19 @@ export const getVideoByPublisherId = async (publisherId, page, limit, sort) => {
     }
 };
 
-export const getVideoUserLiked = async (userId, page, limit, sort) => {
+export const getVideoUserLiked = async (tiktokId, page, limit, sort) => {
     try {
-        const res = await axios.get('/video/liked', { params: { userId, page, limit, sort } });
+        const res = await axios.get('/video/liked', { params: { tiktokId, page, limit, sort } });
+        return res;
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+};
+
+export const getVideoUserSaved = async (tiktokId, page, limit, sort) => {
+    try {
+        const res = await axios.get('/video/saved', { params: { tiktokId, page, limit, sort } });
         return res;
     } catch (error) {
         console.error(error);

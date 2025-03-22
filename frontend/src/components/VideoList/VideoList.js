@@ -3,20 +3,22 @@ import classNames from 'classnames/bind';
 
 import styles from './VideoList.module.scss';
 import VideoItem from './VideoItem/VideoItem';
+import { memo } from 'react';
 
 const cx = classNames.bind(styles);
 
 function VideoList({ data, lastVideoElementRef }) {
     return (
         <div className={cx('wrapper')}>
-            {data.length > 0 && data.map((item, index) => (
-                <VideoItem
-                    key={item._id}
-                    data={item}
-                    isLast={index === data.length - 1}
-                    lastVideoElementRef={lastVideoElementRef}
-                />
-            ))}
+            {data.length > 0 &&
+                data.map((item, index) => (
+                    <VideoItem
+                        key={item._id}
+                        data={item}
+                        isLast={index === data.length - 1}
+                        lastVideoElementRef={lastVideoElementRef}
+                    />
+                ))}
         </div>
     );
 }
@@ -25,4 +27,4 @@ VideoList.propTypes = {
     data: PropTypes.array.isRequired,
 };
 
-export default VideoList;
+export default memo(VideoList);

@@ -3,8 +3,6 @@ import Hls from 'hls.js';
 
 const useHLS = (videoRef, hlsUrl) => {
     useEffect(() => {
-        console.log('videoRef.current', videoRef.current);
-        console.log('hlsUrl', hlsUrl);
         if (!videoRef.current || !hlsUrl) return;
 
         if (Hls.isSupported()) {

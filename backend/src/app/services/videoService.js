@@ -1,7 +1,7 @@
-const fs = require("fs");
 const { cloudinary } = require("../../config");
 const Video = require("../models/video");
-const { connect } = require("tls");
+const { Readable } = require("stream");
+const { emitOne } = require("../../socket");
 
 /**
  * @param { ID của người dùng đang đăng nhập } watcherId
@@ -15,16 +15,21 @@ const recommendedVideos = async (
   watcherId,
   watchHistorys = [],
   likes = [],
+  saves = [],
   page = 1,
   limit = 10
 ) => {
+  console.log("likes, saves:", likes, saves);
   try {
     const videos = await Video.aggregate([
       {
         $match: {
-          publisherId: { $ne: watcherId },
-          _id: { $nin: watchHistorys },
-          _id: { $nin: likes },
+          $and: [
+            { publisherId: { $ne: watcherId } },
+            { _id: { $nin: watchHistorys } },
+            { _id: { $nin: likes } },
+            { _id: { $nin: saves } },
+          ],
         },
       },
       {
@@ -119,12 +124,17 @@ const getVideoByPublisherId = async (
   }
 };
 
-const getVideoUserLiked = async (likes, page = 1, limit = 10, sort = -1) => {
+const getVideoUserLikedOrSaved = async (
+  likesOrSaves,
+  page = 1,
+  limit = 10,
+  sort = -1
+) => {
   try {
     const videos = await Video.aggregate([
       {
         $match: {
-          _id: { $in: likes },
+          _id: { $in: likesOrSaves },
         },
       },
       {
@@ -192,45 +202,107 @@ const getVideoByHashAndPublisherId = async (hash, publisherId) => {
  * @param {string} filePath - Đường dẫn tệp cần upload
  * @returns {Promise<Object>} - Thông tin tệp upload
  */
-const uploadVideo = async (filePath, hash) => {
+const uploadVideo = async (fileBuffer, hash, tiktokId) => {
   try {
-    const result = await cloudinary.uploader.upload(filePath, {
-      folder: "TikTok_Clone/video",
-      resource_type: "video",
-      chunk_size: 20 * 1024 * 1024,
-      // Tạo phiên bản HLS (.m3u8) sau khi upload
-      eager: [
-        { streaming_profile: "hd", format: "m3u8" }, // Chuyển đổi sang HLS
-      ],
-    });
+    let uploadedBytes = 0;
+    const fileSize = fileBuffer.length;
 
-    return {
-      status: 200,
-      code: "OK",
-      data: {
-        cloudinary_public_id: result.public_id,
-        original_url: result.secure_url, // Link gốc MP4
-        hls_url: result.eager[0].secure_url, // Link phát HLS (.m3u8)
-        width: result.width,
-        height: result.height,
-        hash,
-      },
-    };
+    return new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: "TikTok_Clone/videos",
+          resource_type: "video",
+          chunk_size: 10 * 1024 * 1024,
+          eager: [{ streaming_profile: "hd", format: "m3u8" }],
+          eager_async: true, // Không block request, xử lý HLS sau
+        },
+        async (error, result) => {
+          if (error) {
+            console.error("Lỗi upload:", error);
+            emitOne(tiktokId, "uploadProgress", { progress: 20 });
+            return reject({
+              status: 500,
+              code: "ERROR",
+              message: "Upload failed",
+            });
+          }
+
+          let progress = 90;
+          console.log("Upload thành công, chờ xử lý HLS...");
+          emitOne(tiktokId, "uploadProgress", { progress });
+
+          // Kiểm tra trạng thái HLS mỗi 5 giây
+          const checkHLS = setInterval(async () => {
+            try {
+              const info = await cloudinary.api.resource(result.public_id, {
+                resource_type: "video",
+              });
+
+              const hlsFile = info?.derived?.find((d) =>
+                d.secure_url.endsWith(".m3u8")
+              );
+
+              if (hlsFile) {
+                clearInterval(checkHLS);
+                console.log("HLS hoàn tất!");
+                emitOne(tiktokId, "uploadProgress", { progress: 100 });
+
+                resolve({
+                  status: 200,
+                  code: "OK",
+                  data: {
+                    cloudinary_public_id: result.public_id,
+                    original_url: result.secure_url, // Link MP4
+                    hls_url: hlsFile.secure_url, // Đúng file .m3u8
+                    width: result.width,
+                    height: result.height,
+                    hash,
+                  },
+                });
+              } else {
+                if (progress < 99) {
+                  progress += 1;
+                  emitOne(tiktokId, "uploadProgress", { progress });
+                }
+              }
+            } catch (err) {
+              console.error("Lỗi kiểm tra HLS:", err);
+            }
+          }, 3000);
+        }
+      );
+
+      // Chia nhỏ buffer thành từng chunk
+      const chunkSize = 1024 * 256; // 256KB
+      let currentPosition = 0;
+
+      const readableStream = new Readable({
+        read() {
+          if (currentPosition < fileBuffer.length) {
+            const chunk = fileBuffer.slice(
+              currentPosition,
+              currentPosition + chunkSize
+            );
+            this.push(chunk);
+            uploadedBytes += chunk.length;
+            currentPosition += chunkSize;
+
+            const progress = Math.min(
+              Math.round((uploadedBytes / fileSize) * 80) + 10,
+              90
+            );
+            emitOne(tiktokId, "uploadProgress", { progress });
+          } else {
+            this.push(null); // Kết thúc stream
+          }
+        },
+      });
+
+      readableStream.pipe(uploadStream);
+    });
   } catch (error) {
-    console.log(error);
-    return {
-      status: 500,
-      code: "ERROR",
-      message: "Internal server error",
-    };
-  } finally {
-    // Xóa file sau khi upload xong/lỗi để tiết kiệm bộ nhớ
-    if (filePath && fs.existsSync(filePath)) {
-      fs.promises
-        .unlink(filePath)
-        .then(() => console.log("Đã xóa file tạm:", filePath))
-        .catch((err) => console.error("Lỗi khi xóa file tạm:", err));
-    }
+    console.error(error);
+    return { status: 500, code: "ERROR", message: "Internal server error" };
   }
 };
 
@@ -256,7 +328,7 @@ module.exports = {
   recommendedVideos,
   getVideoByFollowing,
   getVideoByPublisherId,
-  getVideoUserLiked,
+  getVideoUserLikedOrSaved,
   getVideoByHash,
   getVideoByHashAndPublisherId,
   uploadVideo,
