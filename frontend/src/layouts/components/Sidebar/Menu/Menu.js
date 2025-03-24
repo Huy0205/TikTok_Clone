@@ -16,7 +16,7 @@ import {
     LiveIconActive,
     ProfileIcon,
 } from '~/components/Icon';
-import { ModalContext } from '~/contexts';
+import { ModalContext, VideoListContext } from '~/contexts';
 import { AuthContext } from '~/contexts/AuthContext';
 import config from '~/config';
 import Image from '~/components/Avatar';
@@ -27,6 +27,7 @@ function Menu() {
     const { openModal } = useContext(ModalContext);
     const { auth } = useContext(AuthContext);
     const { isAuthenticated, user } = auth;
+    const { resetVideoListContext } = useContext(VideoListContext);
 
     const Avatar = () => <Image src={user?.avatar} size={24} alt="avatar" className={cx('profile-image')} />;
 
@@ -40,6 +41,7 @@ function Menu() {
                 canActive
                 className={cx('menu-item')}
                 to={config.routes.home}
+                onClick={resetVideoListContext}
             >
                 <span className={cx('menu-item-text')}>Dành cho bạn</span>
             </Button>
@@ -51,6 +53,7 @@ function Menu() {
                 canActive
                 className={cx('menu-item')}
                 to={config.routes.explore}
+                onClick={resetVideoListContext}
             >
                 <span className={cx('menu-item-text')}>Khám phá</span>
             </Button>
@@ -62,6 +65,7 @@ function Menu() {
                 canActive
                 className={cx('menu-item')}
                 to={config.routes.following}
+                onClick={resetVideoListContext}
             >
                 <span className={cx('menu-item-text')}>Đang Follow</span>
             </Button>
@@ -74,6 +78,7 @@ function Menu() {
                     canActive
                     className={cx('menu-item')}
                     to={config.routes.friends}
+                    onClick={resetVideoListContext}
                 >
                     <span className={cx('menu-item-text')}>Bạn bè</span>
                 </Button>
@@ -86,6 +91,7 @@ function Menu() {
                 canActive
                 className={cx('menu-item')}
                 to={config.routes.live}
+                onClick={resetVideoListContext}
             >
                 <span className={cx('menu-item-text')}>LIVE</span>
             </Button>
@@ -97,6 +103,7 @@ function Menu() {
                 canActive={isAuthenticated}
                 className={cx('menu-item')}
                 {...(isAuthenticated ? { to: `/@${user.tiktokId}` } : { onClick: openModal })}
+                onClick={resetVideoListContext}
             >
                 <span className={cx('menu-item-text')}>Hồ sơ</span>
             </Button>

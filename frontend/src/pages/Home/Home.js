@@ -9,14 +9,8 @@ function Home() {
     const [loading, setLoading] = useState(false);
 
     const { auth, isLoadingAuth } = useContext(AuthContext);
-    const { videoList, setVideoList, page, setHasMore, loadedPages, resetVideoListContext } =
+    const { videoList, setVideoList, page, setHasMore, loadedPages } =
         useContext(VideoListContext);
-
-    useEffect(() => {
-        return () => {
-            resetVideoListContext();
-        };
-    }, [resetVideoListContext]);
 
     useEffect(() => {
         if (isLoadingAuth) return;
