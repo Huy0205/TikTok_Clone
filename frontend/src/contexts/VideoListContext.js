@@ -1,4 +1,4 @@
-import { createContext, useRef, useState } from 'react';
+import { createContext, useCallback, useRef, useState } from 'react';
 
 export const VideoListContext = createContext();
 
@@ -9,6 +9,14 @@ export function VideoListProvider({ children }) {
     const [scrollPosition, setScrollPosition] = useState(0);
 
     const loadedPages = useRef(new Set());
+
+    const resetVideoListContext = useCallback(() => {
+        setVideoList([]);
+        setPage(1);
+        setHasMore(true);
+        setScrollPosition(0);
+        loadedPages.current.clear();
+    }, []);
 
     return (
         <VideoListContext.Provider
@@ -22,6 +30,7 @@ export function VideoListProvider({ children }) {
                 scrollPosition,
                 setScrollPosition,
                 loadedPages,
+                resetVideoListContext,
             }}
         >
             {children}

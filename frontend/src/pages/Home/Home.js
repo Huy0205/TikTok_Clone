@@ -8,12 +8,19 @@ import Loading from '~/components/Loading';
 function Home() {
     const [loading, setLoading] = useState(false);
 
-    const { auth } = useContext(AuthContext);
-    const { videoList, setVideoList, page, setHasMore, loadedPages } = useContext(VideoListContext);
+    const { auth, isLoadingAuth } = useContext(AuthContext);
+    const { videoList, setVideoList, page, setHasMore, loadedPages, resetVideoListContext } =
+        useContext(VideoListContext);
 
     useEffect(() => {
+        return () => {
+            resetVideoListContext();
+        };
+    }, [resetVideoListContext]);
+
+    useEffect(() => {
+        if (isLoadingAuth) return;
         if (loadedPages.current.has(page)) return;
-        console.log('reload');
         const fetchRecommendedVideos = async () => {
             setLoading(true);
             const res = await VideoServices.recommendedVideos(auth.user.tiktokId, page, 5);

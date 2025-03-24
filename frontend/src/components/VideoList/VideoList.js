@@ -34,6 +34,7 @@ function VideoList({ data }) {
 
     useEffect(() => {
         if (scrollPosition) {
+            console.log('scrollPosition:', scrollPosition);
             window.scrollTo(0, parseInt(scrollPosition, 10));
         }
     }, [scrollPosition]);
