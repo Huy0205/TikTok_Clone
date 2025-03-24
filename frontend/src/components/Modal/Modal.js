@@ -14,6 +14,10 @@ import { ModalContext } from '~/contexts';
 const cx = classNames.bind(styles);
 
 const currentYear = new Date().getFullYear();
+const accountTest = {
+    email: 'tanhuy.se@gmail.com',
+    password: 'TanHuy@731',
+};
 
 function Modal() {
     const { showModal, closeModal } = useContext(ModalContext);
@@ -22,7 +26,7 @@ function Modal() {
     const [showPassword, setShowPassword] = useState(false);
     const [days, setDays] = useState([...Array(31).keys()]);
     const [otpValue, setOtpValue] = useState('');
-    const [formData, setFormData] = useState({});
+    const [formData, setFormData] = useState(accountTest);
     const [timer, setTimer] = useState(0);
     const [selectAtived, setSelectAtived] = useState();
     const [loading, setLoading] = useState(false);
@@ -72,6 +76,11 @@ function Modal() {
     const changeForm = (form) => {
         setScreen(form);
         if (form === 'inputTiktokId') {
+            return;
+        }
+        if (form === 'login') {
+            setFormData(accountTest);
+            setError({});
             return;
         }
         setFormData({});
@@ -200,7 +209,6 @@ function Modal() {
     };
 
     const handleRegister = async () => {
-        console.log(formData);
         if (error.tiktokId) {
             return;
         }

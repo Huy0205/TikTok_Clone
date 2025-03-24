@@ -13,7 +13,7 @@ const auth = (req, res, next) => {
     "/video/recommended",
     "/video/publisher",
     "/video/liked",
-    "/follow/countOfUser",
+    "/follow/count-of-user",
     "/like/count-by-videoId",
     "/save/count-by-videoId",
   ];

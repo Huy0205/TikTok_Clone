@@ -3,11 +3,41 @@ import classNames from 'classnames/bind';
 
 import styles from './VideoList.module.scss';
 import VideoItem from './VideoItem/VideoItem';
-import { memo } from 'react';
+import { memo, useCallback, useContext, useEffect, useRef } from 'react';
+import { VideoListContext } from '~/contexts';
 
 const cx = classNames.bind(styles);
 
-function VideoList({ data, lastVideoElementRef }) {
+function VideoList({ data }) {
+    const { hasMore, setPage, scrollPosition, setScrollPosition } = useContext(VideoListContext);
+
+    const observer = useRef();
+
+    const lastVideoElementRef = useCallback(
+        (node) => {
+            if (observer.current) observer.current.disconnect();
+            observer.current = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting && hasMore) {
+                    setPage((prevPage) => prevPage + 1);
+                }
+            });
+            if (node) observer.current.observe(node);
+        },
+        [hasMore, setPage],
+    );
+
+    useEffect(() => {
+        return () => {
+            setScrollPosition(window.scrollY);
+        };
+    }, [setScrollPosition]);
+
+    useEffect(() => {
+        if (scrollPosition) {
+            window.scrollTo(0, parseInt(scrollPosition, 10));
+        }
+    }, [scrollPosition]);
+
     return (
         <div className={cx('wrapper')}>
             {data.length > 0 &&

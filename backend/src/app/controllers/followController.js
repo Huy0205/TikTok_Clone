@@ -18,6 +18,7 @@ const handleCheckFollow = async (req, res) => {
 
 const handleCountFollowOfUser = async (req, res) => {
   const { tiktokId } = req.query;
+  console.log("handleCountFollowOfUser:", tiktokId);
   if (!tiktokId) {
     return res.status(400).json({
       status: 400,

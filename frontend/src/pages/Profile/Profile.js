@@ -12,7 +12,7 @@ import { faEllipsis } from '@fortawesome/free-solid-svg-icons';
 
 import VideoList from './VideoList';
 import Loading from '~/components/Loading';
-import { AuthContext, ModalContext } from '~/contexts';
+import { AuthContext } from '~/contexts';
 
 const cx = classNames.bind(styles);
 
@@ -21,9 +21,8 @@ function Profile() {
 
     const navigate = useNavigate();
 
-    const { auth, isLoadingAuth } = useContext(AuthContext);
+    const { auth } = useContext(AuthContext);
     const { user: userAuth, isAuthenticated } = auth;
-    const { openModal } = useContext(ModalContext);
 
     const [user, setUser] = useState({});
     const [activeTab, setActiveTab] = useState('video');
@@ -41,12 +40,8 @@ function Profile() {
     };
 
     useEffect(() => {
-        if (!isLoadingAuth && !isAuthenticated) {
-            openModal('/profile');
-        }
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isLoadingAuth, isAuthenticated]);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [tiktokId]);
 
     useEffect(() => {
         const currentTab = tabRefs[activeTab].current;
@@ -64,7 +59,7 @@ function Profile() {
             else navigate(-1);
         };
         fetchUser();
-    }, [tiktokId]);
+    }, [navigate, tiktokId]);
 
     useEffect(() => {
         setLoading(true);
@@ -90,16 +85,16 @@ function Profile() {
     }, [activeTab, sortOption, user.tiktokId]);
 
     useEffect(() => {
+        if (!isAuthenticated) return;
         const checkFollow = async () => {
-            if (userAuth) {
-                const response = await FollowServices.checkFollow(user.tiktokId);
-                if (response.code === 'OK') setFollowed(!!response.data);
-            }
+            const response = await FollowServices.checkFollow(user.tiktokId);
+            if (response.code === 'OK') setFollowed(!!response.data);
         };
         checkFollow();
-    }, [user.tiktokId, userAuth]);
+    }, [isAuthenticated, user.tiktokId]);
 
     useEffect(() => {
+        if (!user.tiktokId) return;
         const countFollowOfUser = async () => {
             const response = await FollowServices.countFollowOfUser(user.tiktokId);
             if (response.code === 'OK') {

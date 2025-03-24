@@ -1,4 +1,4 @@
-import { memo, useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames/bind';
 
@@ -88,8 +88,7 @@ function VideoItem({ data, isLast, lastVideoElementRef }) {
 
     const getThumbnailUrl = (videoUrl) => {
         if (!videoUrl) return '';
-
-        return videoUrl.replace('/video/upload/sp_hd/', '/video/upload/so_0/').replace('.m3u8', '.jpg');
+        return videoUrl.replace(/\/video\/upload\/.*?\/v/, '/video/upload/v').replace('.m3u8', '.jpg');
     };
 
     return (
@@ -130,4 +129,4 @@ VideoItem.propTypes = {
     lastVideoElementRef: PropTypes.func.isRequired,
 };
 
-export default memo(VideoItem);
+export default VideoItem;

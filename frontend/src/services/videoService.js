@@ -22,10 +22,7 @@ export const getVideoByFollowing = async (page, limit) => {
 
 export const getVideoByPublisherId = async (publisherId, page, limit, sort) => {
     try {
-        console.log('publisherId', publisherId);
-        console.log('!publisherId', !publisherId);
         const res = await axios.get('/video/publisher', { params: { publisherId, page, limit, sort } });
-        console.log('test:', res);
         return res;
     } catch (error) {
         console.error(error);

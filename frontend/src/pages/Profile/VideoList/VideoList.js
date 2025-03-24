@@ -4,12 +4,12 @@ import styles from './VideoList.module.scss';
 import { useRef, useState } from 'react';
 
 function VideoList({ data }) {
-    const videoRefs = useRef([]); // Dùng useRef để lưu danh sách video
+    const videoRefs = useRef([]);
 
     const [currentPlaying, setCurrentPlaying] = useState(null);
 
     const handleMouseEnter = (videoRef) => {
-        if (!videoRef) return; // Tránh lỗi nếu ref chưa có giá trị
+        if (!videoRef) return;
 
         if (currentPlaying && currentPlaying !== videoRef) {
             currentPlaying.pause();

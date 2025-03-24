@@ -1,45 +1,30 @@
-import { useContext, useEffect, useState, useRef, useCallback } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import { VideoServices } from '~/services';
-import { AuthContext } from '~/contexts';
+import { AuthContext, VideoListContext } from '~/contexts';
 import VideoList from '~/components/VideoList';
 import Loading from '~/components/Loading';
 
 function Home() {
     const [loading, setLoading] = useState(false);
-    const [data, setData] = useState([]);
-    const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
 
     const { auth } = useContext(AuthContext);
-
-    const observer = useRef();
-    const lastVideoElementRef = useCallback(
-        (node) => {
-            console.log(node);
-            if (loading) return;
-            if (observer.current) observer.current.disconnect();
-            observer.current = new IntersectionObserver((entries) => {
-                if (entries[0].isIntersecting && hasMore) {
-                    setPage((prevPage) => prevPage + 1);
-                }
-            });
-            if (node) observer.current.observe(node);
-        },
-        [loading, hasMore],
-    );
+    const { videoList, setVideoList, page, setHasMore, loadedPages } = useContext(VideoListContext);
 
     useEffect(() => {
-        setLoading(true);
+        if (loadedPages.current.has(page)) return;
+        console.log('reload');
         const fetchRecommendedVideos = async () => {
+            setLoading(true);
             const res = await VideoServices.recommendedVideos(auth.user.tiktokId, page, 5);
             if (res.code === 'OK') {
-                setData((prev) => [...prev, ...res.data]);
+                setVideoList((prev) => [...prev, ...res.data]);
                 setHasMore(res.data.length > 0);
-                setLoading(false);
+                loadedPages.current.add(page);
             } else {
                 console.error(res.message);
             }
+            setLoading(false);
         };
 
         fetchRecommendedVideos();
@@ -48,7 +33,7 @@ function Home() {
 
     return (
         <div>
-            <VideoList data={data} lastVideoElementRef={lastVideoElementRef} />
+            <VideoList data={videoList} />
             {loading && (
                 <div style={{ height: 100 }}>
                     <Loading />

@@ -34,7 +34,6 @@ function VideoSibar({ videoId, publisherId, shares }) {
                 LikeServices.countLikesByVideoId(videoId),
                 SaveServices.countSavesByVideoId(videoId),
             ]);
-            console.log(countSaveRes);
             setPublisher(userRes.data);
             setLikeCount(countLikeRes.data);
             setSaveCount(countSaveRes.data);

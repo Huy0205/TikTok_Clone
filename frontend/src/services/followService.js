@@ -12,7 +12,7 @@ export const checkFollow = async (followingId) => {
 
 export const countFollowOfUser = async (tiktokId) => {
     try {
-        const res = await axios.get('/follow/countOfUser', { params: { tiktokId } });
+        const res = await axios.get('/follow/count-of-user', { params: { tiktokId } });
         return res;
     } catch (error) {
         console.error(error);
