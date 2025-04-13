@@ -44,23 +44,31 @@ function VideoSibar({ videoId, publisherId, shares }) {
     useEffect(() => {
         if (!socket) return;
 
+        // 1. Join room
         socket.emit('joinRoom', { roomId: videoId, roomType: 'video' });
 
-        socket.on('likeCountUpdated', ({ videoId: updatedId, change }) => {
+        // 2. Define listeners
+        const handleLikeUpdate = ({ videoId: updatedId, change }) => {
             if (updatedId === videoId) {
                 setLikeCount((prev) => prev + change);
             }
-        });
+        };
 
-        socket.on('saveCountUpdated', ({ videoId: updatedId, change }) => {
+        const handleSaveUpdate = ({ videoId: updatedId, change }) => {
             if (updatedId === videoId) {
                 setSaveCount((prev) => prev + change);
             }
-        });
+        };
 
+        // 3. Attach listeners
+        socket.on('likeCountUpdated', handleLikeUpdate);
+        socket.on('saveCountUpdated', handleSaveUpdate);
+
+        // 4. Cleanup
         return () => {
             socket.emit('leaveRoom', { roomId: videoId, roomType: 'video' });
-            socket.off('likeCountUpdated');
+            socket.off('likeCountUpdated', handleLikeUpdate);
+            socket.off('saveCountUpdated', handleSaveUpdate);
         };
     }, [socket, videoId]);
 
@@ -90,7 +98,7 @@ function VideoSibar({ videoId, publisherId, shares }) {
             const deleteRes = await service.deleteOne(itemId);
             if (deleteRes.code === 'OK') {
                 setItemId(null);
-                socket.emit(socketEvent, { videoId, action: `un${interactionType}` });
+                socket.emit(socketEvent, { publisherId, videoId, action: `un${interactionType}` });
             }
         } else {
             const addRes = await service.addOne({
@@ -100,7 +108,7 @@ function VideoSibar({ videoId, publisherId, shares }) {
 
             if (addRes.code === 'OK') {
                 setItemId(addRes.data._id);
-                socket.emit(socketEvent, { videoId, action: interactionType });
+                socket.emit(socketEvent, { publisherId, videoId, action: interactionType });
             }
         }
 

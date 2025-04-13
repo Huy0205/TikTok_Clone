@@ -251,14 +251,19 @@ const search = async (currentTiktokId, keyword, page, limit) => {
 
 const getUserByFollowings = async (followings, page, limit) => {
   try {
-    const users = await User.find({ tiktokId: { $in: followings } })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .exec();
+    const query = { tiktokId: { $in: followings } };
+    const [users, total] = await Promise.all([
+      User.find(query)
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .exec(),
+      User.countDocuments(query),
+    ]);
     return {
       status: 200,
       code: "OK",
-      data: users,
+      data: { users, total },
     };
   } catch (error) {
     console.log(error);

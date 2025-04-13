@@ -9,9 +9,9 @@ const NotificationSchema = new mongoose.Schema(
       required: true,
     },
     senderId: { type: String, required: true },
-    target: { type: mongoose.Schema.Types.Mixed, required: true },
+    target: { type: mongoose.Schema.Types.Mixed },
     message: { type: String, required: true },
-    viewed: { type: String, required: true },
+    viewed: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

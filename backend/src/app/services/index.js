@@ -5,6 +5,7 @@ const WatchHistoryServices = require("./watchHistoryService");
 const LikeServices = require("./likeService");
 const SaveServices = require("./saveService");
 const FollowServices = require("./followService");
+const NotificationServices = require("./notificationService");
 
 module.exports = {
   UserServices,
@@ -14,4 +15,5 @@ module.exports = {
   LikeServices,
   SaveServices,
   FollowServices,
+  NotificationServices,
 };

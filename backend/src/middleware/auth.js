@@ -13,8 +13,11 @@ const auth = (req, res, next) => {
     "/video/recommended",
     "/video/publisher",
     "/video/liked",
-    "/follow/count-of-user",
+    "/video/saved",
+    "/follow/count-by-following",
+    "/follow/count-by-follower",
     "/like/count-by-videoId",
+    "/like/count-by-publisherId",
     "/save/count-by-videoId",
   ];
   if (whiteList.includes(req.path)) {

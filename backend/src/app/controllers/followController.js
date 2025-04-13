@@ -1,24 +1,20 @@
 const { FollowServices } = require("../services");
 
 const handleCheckFollow = async (req, res) => {
-  const {
-    user: { tiktokId },
-  } = req;
-  const { followingId } = req.params;
-  if (!followingId) {
+  const { followerId, followingId } = req.query;
+  if (!followerId || !followingId) {
     return res.status(400).json({
       status: 400,
       code: "NOT_ENOUGH_INFO",
-      message: "followingId is required",
+      message: "followerId, followingId is required",
     });
   }
-  const response = await FollowServices.checkFollow(tiktokId, followingId);
+  const response = await FollowServices.checkFollow(followerId, followingId);
   return res.status(response.status).json(response);
 };
 
-const handleCountFollowOfUser = async (req, res) => {
+const handleCountByFollowing = async (req, res) => {
   const { tiktokId } = req.query;
-  console.log("handleCountFollowOfUser:", tiktokId);
   if (!tiktokId) {
     return res.status(400).json({
       status: 400,
@@ -26,7 +22,20 @@ const handleCountFollowOfUser = async (req, res) => {
       message: "tiktokId is required",
     });
   }
-  const response = await FollowServices.countFollowOfUser(tiktokId);
+  const response = await FollowServices.countByFollowing(tiktokId);
+  return res.status(response.status).json(response);
+};
+
+const handleCountByFollower = async (req, res) => {
+  const { tiktokId } = req.query;
+  if (!tiktokId) {
+    return res.status(400).json({
+      status: 400,
+      code: "NOT_ENOUGH_INFO",
+      message: "tiktokId is required",
+    });
+  }
+  const response = await FollowServices.countByFollower(tiktokId);
   return res.status(response.status).json(response);
 };
 
@@ -35,7 +44,6 @@ const handleAddFollow = async (req, res) => {
     user: { tiktokId },
   } = req;
   const { followingId } = req.body;
-  console.log(followingId, tiktokId, "handleAddFollow");
   if (!followingId) {
     return res.status(400).json({
       status: 400,
@@ -65,7 +73,8 @@ const handleUnFollow = async (req, res) => {
 
 module.exports = {
   handleCheckFollow,
-  handleCountFollowOfUser,
+  handleCountByFollowing,
+  handleCountByFollower,
   handleAddFollow,
   handleUnFollow,
 };

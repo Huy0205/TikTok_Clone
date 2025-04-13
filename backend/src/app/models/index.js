@@ -5,6 +5,7 @@ const WatchHistory = require("./watchHistory");
 const Like = require("./like");
 const Follow = require("./follow");
 const Comment = require("./comment");
+const Notification = require("./notification");
 
 module.exports = {
   User,
@@ -14,4 +15,5 @@ module.exports = {
   Like,
   Follow,
   Comment,
+  Notification,
 };

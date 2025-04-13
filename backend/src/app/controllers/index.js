@@ -4,6 +4,7 @@ const VideoControllers = require("./videoController");
 const FollowControllers = require("./followController");
 const LikeController = require("./likeController");
 const SaveController = require("./saveController");
+const NotificationController = require("./notificationController");
 
 module.exports = {
   UserControllers,
@@ -12,4 +13,5 @@ module.exports = {
   FollowControllers,
   LikeController,
   SaveController,
+  NotificationController,
 };

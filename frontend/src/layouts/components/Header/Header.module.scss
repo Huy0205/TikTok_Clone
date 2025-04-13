@@ -39,6 +39,84 @@
     }
 }
 
+.relative {
+    position: relative;
+}
+
+.notification-container {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--primary);
+}
+
+.notification-badge {
+    font-size: 1rem;
+    line-height: normal;
+    color: white;
+}
+
+.notification-list-wrapper {
+    width: 350px;
+    margin-top: 5px;
+}
+
+.notification-item {
+    align-items: normal;
+}
+
+.notification-title-container {
+    padding-inline: 15px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.notification-content {
+    padding-left: 5px;
+    flex: 3;
+    text-align: left;
+}
+
+.notification-nickname {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 3px;
+}
+
+.notification-message,
+.follow-btn,
+.none-notification {
+    font-size: 1.4rem;
+}
+
+.notification-message {
+    font-weight: 500;
+    color: rgba(22, 24, 35);
+
+    &.viewed {
+        color: rgba(22, 24, 35, 0.5);
+    }
+}
+
+.follow-container {
+    flex: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.none-notification {
+    border-top: 1px solid rgba(22, 24, 35, 0.12);
+    padding: 15px;
+    text-align: center;
+}
+
 .more-icon,
 .avatar-wrapper {
     cursor: pointer;

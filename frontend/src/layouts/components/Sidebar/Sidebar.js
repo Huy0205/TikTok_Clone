@@ -1,10 +1,10 @@
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import classNames from 'classnames/bind';
 
 import styles from './Sidebar.module.scss';
 import { UserServices } from '~/services';
 import { AuthContext } from '~/contexts/AuthContext';
-import { ModalContext } from '~/contexts';
+import { ModalContext, SocketContext } from '~/contexts';
 import Menu from './Menu/Menu';
 import Button from '~/components/Button';
 import images from '~/assets/images';
@@ -19,31 +19,93 @@ function Sidebar() {
     const { openModal } = useContext(ModalContext);
     const { auth } = useContext(AuthContext);
     const { isAuthenticated } = auth;
+    const socket = useContext(SocketContext);
 
     const [followings, setFollowings] = useState([]);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
 
-    useEffect(() => {
-        if (!isAuthenticated) return;
-        const fetchFollowings = async () => {
-            const res = await UserServices.getUserByFollowings(page, 10);
-            if (res) {
-                setFollowings((prev) => [...prev, ...res.data]);
-                setHasMore(res.data.length % 10 === 0);
-            }
-        };
+    const followingsRef = useRef([]);
+    const hasMoreRef = useRef(true);
+    const pageRef = useRef(page);
 
-        fetchFollowings();
-    }, [isAuthenticated, page]);
-
-    const handleIncreasePage = async () => {
+    const handleIncreasePage = () => {
         setPage(page + 1);
     };
 
     const handleClickLogin = () => {
         openModal(location.pathname);
     };
+
+    const fetchUsers = useCallback(async () => {
+        const res = await UserServices.getUserByFollowings(page, 10);
+        if (res.code === 'OK') {
+            return res.data;
+        }
+        return null;
+    }, [page]);
+
+    const handleAddFollowing = useCallback(async ({ followingId }) => {
+        const userRes = await UserServices.getUserByTiktokId(followingId);
+        if (userRes.code === 'OK') {
+            const followingsLength = followingsRef.current.length;
+            if (followingsLength > 0 && followingsLength % 10 === 0) {
+                setFollowings((prev) => [userRes.data, ...prev.slice(0, -1)]);
+                setHasMore(true);
+            } else {
+                setFollowings((prev) => [userRes.data, ...prev]);
+            }
+        }
+    }, []);
+
+    const handleDeleteFollowing = useCallback(
+        async ({ followingId }) => {
+            const currentFollowings = followingsRef.current;
+            const updateFollowings = currentFollowings.filter((following) => following.tiktokId !== followingId);
+            if (updateFollowings.length < currentFollowings.length) {
+                let updated = [];
+                if (hasMoreRef.current) {
+                    const { users, total } = await fetchUsers();
+                    updated = [...updateFollowings, users[users.length - 1]];
+                    setHasMore(updated.length < total);
+                } else {
+                    updated = [...updateFollowings];
+                }
+                setFollowings(updated);
+            }
+        },
+        [fetchUsers],
+    );
+
+    useEffect(() => {
+        followingsRef.current = followings;
+        hasMoreRef.current = hasMore;
+        pageRef.current = page;
+    }, [followings, hasMore, page]);
+
+    useEffect(() => {
+        if (!isAuthenticated) return;
+
+        const fetchFollowings = async () => {
+            const { users, total } = await fetchUsers();
+            const updated = [...followingsRef.current, ...users];
+            setFollowings(updated);
+            setHasMore(updated.length < total);
+        };
+        fetchFollowings();
+    }, [fetchUsers, isAuthenticated]);
+
+    useEffect(() => {
+        if (!socket) return;
+
+        socket.on('followSuccess', handleAddFollowing);
+        socket.on('unfollowSuccess', handleDeleteFollowing);
+
+        return () => {
+            socket.off('followSuccess', handleAddFollowing);
+            socket.off('unfollowSuccess', handleDeleteFollowing);
+        };
+    }, [handleAddFollowing, handleDeleteFollowing, socket]);
 
     return (
         <aside className={cx('wrapper')}>

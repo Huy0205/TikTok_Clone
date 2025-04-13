@@ -3,6 +3,7 @@ const userSocketMap = new Map();
 
 const initSocket = (server) => {
   const { Server } = require("socket.io");
+  const { NotificationServices } = require("../app/services");
 
   io = new Server(server, {
     cors: { origin: process.env.CORS_ORIGIN, credentials: true },
@@ -28,14 +29,57 @@ const initSocket = (server) => {
       console.log(`User ${socket.id} left room ${fullRoomId}`);
     });
 
-    socket.on("updateLikeCount", ({ videoId, action }) => {
+    socket.on("updateLikeCount", ({ publisherId, videoId, action }) => {
       const change = action === "like" ? 1 : -1;
-      io.to(`video_${videoId}`).emit("likeCountUpdated", { videoId, change });
+      emitRoom(videoId, "video", "likeCountUpdated", { videoId, change });
+      emitRoom(publisherId, "profile", "likeCountUpdated", change);
     });
 
     socket.on("updateSaveCount", ({ videoId, action }) => {
       const change = action === "save" ? 1 : -1;
-      io.to(`video_${videoId}`).emit("saveCountUpdated", { videoId, change });
+      emitRoom(videoId, "video", "saveCountUpdated", { videoId, change });
+    });
+
+    socket.on("addFollow", async ({ followingId, followerId }) => {
+      const notificationSaved = await NotificationServices.saveNotification({
+        receiverId: followingId,
+        type: "follow",
+        senderId: followerId,
+        message: "đã bắt đầu follow bạn",
+        viewed: false,
+      });
+      emitOne(followingId, "followNotification", notificationSaved);
+      emitOne(followerId, "followSuccess", {
+        followerId,
+        followingId,
+        type: "follow",
+      });
+    });
+
+    socket.on(
+      "updateFollowCountOfProfile",
+      ({ followerId, followingId, action }) => {
+        console.log(
+          "followerId, followingId, action:",
+          followerId,
+          followingId,
+          action
+        );
+        const change = action === "follow" ? 1 : -1;
+        emitRoom(followingId, "profile", "followCountOfProfileUpdated", {
+          followerId,
+          change,
+        });
+      }
+    );
+
+    socket.on("deletedFollow", ({ followerId, followingId, type }) => {
+      emitOne(followerId, "unfollowSuccess", { followerId, followingId, type });
+      emitOne(followingId, "checkFollowStatus", {
+        followerId,
+        followingId,
+        type,
+      });
     });
 
     socket.on("disconnect", () => {

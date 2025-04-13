@@ -10,6 +10,16 @@ export const countLikesByVideoId = async (videoId) => {
     }
 };
 
+export const countLikesByPublisherId = async (publisherId) => {
+    try {
+        const res = await axios.get('/like//count-by-publisherId', { params: { publisherId } });
+        return res;
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+};
+
 export const addOne = async (like) => {
     try {
         const res = await axios.post('/like/save', like);

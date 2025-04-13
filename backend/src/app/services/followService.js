@@ -26,7 +26,7 @@ const checkFollow = async (followerId, followingId) => {
     return {
       status: 200,
       code: "OK",
-      data: follow,
+      data: !!follow,
     };
   } catch (error) {
     console.log(error);
@@ -38,9 +38,27 @@ const checkFollow = async (followerId, followingId) => {
   }
 };
 
-const countFollowOfUser = async (userId) => {
+const countByFollowing = async (userId) => {
   try {
     const count = await Follow.find({ followingId: userId }).countDocuments();
+    return {
+      status: 200,
+      code: "OK",
+      data: count,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      code: "ERROR",
+      message: "Internal server error",
+    };
+  }
+};
+
+const countByFollower = async (userId) => {
+  try {
+    const count = await Follow.find({ followerId: userId }).countDocuments();
     return {
       status: 200,
       code: "OK",
@@ -95,7 +113,8 @@ const removeFollow = async (followerId, followingId) => {
 module.exports = {
   findFollowByFollowerId,
   checkFollow,
-  countFollowOfUser,
+  countByFollowing,
+  countByFollower,
   addFollow,
   removeFollow,
 };

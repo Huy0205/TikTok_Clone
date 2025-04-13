@@ -1,4 +1,5 @@
-const { LikeServices } = require("../services");
+const { Types } = require("mongoose");
+const { LikeServices, VideoServices } = require("../services");
 
 const handleCountLikesByVideoId = async (req, res) => {
   const { videoId } = req.query;
@@ -12,6 +13,26 @@ const handleCountLikesByVideoId = async (req, res) => {
 
   const countLikesRes = await LikeServices.countLikesByVideoId(videoId);
   return res.status(countLikesRes.status).json(countLikesRes);
+};
+
+const handleCountLikesByPublisherId = async (req, res) => {
+  const { publisherId } = req.query;
+  if (!publisherId) {
+    return res.status(400).json({
+      status: 400,
+      code: "NOT_ENOUGH_INFO",
+      message: "publisherId is required",
+    });
+  }
+
+  const videosRes = await VideoServices.getVideoByPublisherId(publisherId);
+  if (videosRes.code === "OK") {
+    const videos = videosRes.data.map((video) => new Types.ObjectId(video._id));
+    const countLikeRes = await LikeServices.countLikesOfVideos(videos);
+    return res.status(countLikeRes.status).json(countLikeRes);
+  } else {
+    return res.status(videosRes.status).json(videosRes);
+  }
 };
 
 const handleSaveLike = async (req, res) => {
@@ -47,6 +68,7 @@ const handleDeleteLike = async (req, res) => {
 
 module.exports = {
   handleCountLikesByVideoId,
+  handleCountLikesByPublisherId,
   handleSaveLike,
   handleDeleteLike,
 };

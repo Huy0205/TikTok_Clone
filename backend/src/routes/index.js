@@ -5,6 +5,7 @@ const videoRoutes = require("./videoRoute");
 const followRoutes = require("./followRoute");
 const likeRoutes = require("./likeRoute");
 const saveRoutes = require("./saveRute");
+const notificationRoutes = require("./notificationRoute");
 
 const { auth } = require("../middleware");
 
@@ -16,5 +17,6 @@ router.use("/video", videoRoutes);
 router.use("/follow", followRoutes);
 router.use("/like", likeRoutes);
 router.use("/save", saveRoutes);
+router.use("/notification", notificationRoutes);
 
 module.exports = router;

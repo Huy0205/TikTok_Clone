@@ -36,6 +36,24 @@ const countLikesByVideoId = async (videoId) => {
   }
 };
 
+const countLikesOfVideos = async (videos) => {
+  try {
+    const likeCount = await Like.countDocuments({ videoId: { $in: videos } });
+    return {
+      status: 200,
+      code: "OK",
+      data: likeCount,
+    };
+  } catch (error) {
+    console.error("Error counting likes of videos:", error);
+    return {
+      status: 500,
+      code: "ERROR",
+      message: "Internal server error",
+    };
+  }
+};
+
 const saveLike = async (like) => {
   try {
     const savedLike = await Like.create(like);
@@ -84,6 +102,7 @@ const deleteLike = async (likeId) => {
 module.exports = {
   getLikesByLikerId,
   countLikesByVideoId,
+  countLikesOfVideos,
   saveLike,
   deleteLike,
 };

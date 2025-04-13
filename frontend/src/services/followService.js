@@ -1,8 +1,8 @@
 import axios from '~/util/axios.customize';
 
-export const checkFollow = async (followingId) => {
+export const checkFollow = async (followerId, followingId) => {
     try {
-        const res = await axios.post(`/follow/${followingId}`);
+        const res = await axios.get('/follow/check-follow', { params: { followerId, followingId } });
         return res;
     } catch (error) {
         console.error(error);
@@ -10,9 +10,19 @@ export const checkFollow = async (followingId) => {
     }
 };
 
-export const countFollowOfUser = async (tiktokId) => {
+export const countByFollowing = async (tiktokId) => {
     try {
-        const res = await axios.get('/follow/count-of-user', { params: { tiktokId } });
+        const res = await axios.get('/follow/count-by-following', { params: { tiktokId } });
+        return res;
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+};
+
+export const countByFollower = async (tiktokId) => {
+    try {
+        const res = await axios.get('/follow/count-by-follower', { params: { tiktokId } });
         return res;
     } catch (error) {
         console.error(error);

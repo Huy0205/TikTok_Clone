@@ -2,11 +2,13 @@ import PropTypes from 'prop-types';
 import Button from '~/components/Button';
 
 function MenuItem({ item, onClick, className }) {
-    const { icon, title, hasSwitchButton } = item;
+    const { icon, title, hasSwitchButton, to } = item;
 
     let props = {};
     if (hasSwitchButton) {
         props.hasSwitchButton = hasSwitchButton;
+    } else if (to) {
+        props.to = to;
     }
 
     return (

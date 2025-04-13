@@ -20,8 +20,6 @@ export const ModalProvider = ({ children }) => {
         setShowModal(false);
     };
 
-    console.log('ModalProvider', showModal);
-
     return (
         <ModalContext.Provider value={{ showModal, openModal, closeModal }}>
             {children}

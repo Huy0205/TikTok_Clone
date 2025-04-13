@@ -89,24 +89,20 @@ const getVideoByFollowing = async (
   }
 };
 
-const getVideoByPublisherId = async (
-  publisherId,
-  page = 1,
-  limit = 10,
-  sort = -1
-) => {
+const getVideoByPublisherId = async (publisherId, page, limit, sort) => {
   try {
+    let moreQuery = [];
+    if (page && limit && sort) {
+      moreQuery = [
+        { $sort: { createdAt: sort } },
+        { $skip: (page - 1) * limit },
+        { $limit: limit },
+      ];
+    }
+
     const videos = await Video.aggregate([
-      {
-        $match: {
-          publisherId,
-        },
-      },
-      {
-        $sort: { createdAt: sort },
-      },
-      { $skip: (page - 1) * limit },
-      { $limit: limit },
+      { $match: { publisherId } },
+      ...moreQuery,
     ]);
 
     return {
@@ -123,6 +119,7 @@ const getVideoByPublisherId = async (
     };
   }
 };
+
 
 const getVideoUserLikedOrSaved = async (
   likesOrSaves,

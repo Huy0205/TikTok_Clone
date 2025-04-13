@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import classNames from 'classnames/bind';
 
 import styles from './Profile.module.scss';
-import { FollowServices, UserServices, VideoServices } from '~/services';
+import { FollowServices, LikeServices, UserServices, VideoServices } from '~/services';
 import Avatar from '~/components/Avatar';
 import Button from '~/components/Button';
 import { FollowCheckIcon, SettingRegularIcon, ShareRegularIcon } from '~/components/Icon';
@@ -12,7 +12,9 @@ import { faEllipsis } from '@fortawesome/free-solid-svg-icons';
 
 import VideoList from './VideoList';
 import Loading from '~/components/Loading';
-import { AuthContext } from '~/contexts';
+import { AuthContext, ModalContext, SocketContext } from '~/contexts';
+import { checkFollowStatus } from '~/util/checkFollowStatus';
+import { showConfirmDialog } from '~/components/ConfirmDialog';
 
 const cx = classNames.bind(styles);
 
@@ -22,7 +24,9 @@ function Profile() {
     const navigate = useNavigate();
 
     const { auth } = useContext(AuthContext);
-    const { user: userAuth, isAuthenticated } = auth;
+    const { user: userAuth, isAuthenticated, isLoadingAuth } = auth;
+    const { openModal } = useContext(ModalContext);
+    const socket = useContext(SocketContext);
 
     const [user, setUser] = useState({});
     const [activeTab, setActiveTab] = useState('video');
@@ -30,8 +34,11 @@ function Profile() {
     const [sortOption, setSortOption] = useState('new');
     const [videos, setVideos] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [followed, setFollowed] = useState(false);
+    const [followStatus, setFollowStatus] = useState(0);
     const [numberOfFollower, setNumberOfFollower] = useState(0);
+    const [numberOfFollowing, setNumberOfFollowing] = useState(0);
+    const [numberOfLike, setNumberOfLike] = useState(0);
+    const [followStatusTrigger, setFollowStatusTrigger] = useState(0);
 
     const tabRefs = {
         video: useRef(null),
@@ -85,40 +92,119 @@ function Profile() {
     }, [activeTab, sortOption, user.tiktokId]);
 
     useEffect(() => {
-        if (!isAuthenticated) return;
-        const checkFollow = async () => {
-            const response = await FollowServices.checkFollow(user.tiktokId);
-            if (response.code === 'OK') setFollowed(!!response.data);
+        if (!user.tiktokId || !userAuth.tiktokId) return;
+        if (user.tiktokId === userAuth.tiktokId) return;
+
+        const fetchFollowStatus = async () => {
+            const status = await checkFollowStatus(userAuth.tiktokId, user.tiktokId);
+            setFollowStatus(status);
         };
-        checkFollow();
-    }, [isAuthenticated, user.tiktokId]);
+        fetchFollowStatus();
+    }, [user.tiktokId, userAuth.tiktokId, followStatusTrigger]);
+
+    useEffect(() => {
+        if (!socket || !tiktokId) return;
+
+        const roomId = tiktokId.startsWith('@') ? tiktokId.slice(1) : tiktokId;
+
+        socket.emit('joinRoom', { roomId, roomType: 'profile' });
+
+        const handleFollowCountUpdate = ({ followerId, change }) => {
+            if (roomId === followerId) {
+                setNumberOfFollowing((prev) => prev + change);
+            } else {
+                setNumberOfFollower((prev) => prev + change);
+            }
+        };
+        const handleLikeCountUpdate = (change) => {
+            setNumberOfLike((prev) => prev + change);
+        };
+        const updateFollowStatus = () => {
+            setFollowStatusTrigger((prev) => prev + 1);
+        };
+
+        socket.on('followCountOfProfileUpdated', handleFollowCountUpdate);
+        socket.on('likeCountUpdated', handleLikeCountUpdate);
+
+        const statusEvents = ['followNotification', 'checkFollowStatus', 'followSuccess', 'unfollowSuccess'];
+        statusEvents.forEach((event) => {
+            socket.on(event, updateFollowStatus);
+        });
+
+        return () => {
+            socket.emit('leaveRoom', { roomId, roomType: 'profile' });
+            socket.off('followCountOfProfileUpdated', handleFollowCountUpdate);
+            socket.off('likeCountUpdated', handleLikeCountUpdate);
+            statusEvents.forEach((event) => {
+                socket.on(event, updateFollowStatus);
+            });
+        };
+    }, [socket, tiktokId]);
 
     useEffect(() => {
         if (!user.tiktokId) return;
         const countFollowOfUser = async () => {
-            const response = await FollowServices.countFollowOfUser(user.tiktokId);
-            if (response.code === 'OK') {
-                setNumberOfFollower(response.data);
+            const [countByFollowingRes, countByFollowerRes, countLikeRes] = await Promise.all([
+                FollowServices.countByFollowing(user.tiktokId),
+                FollowServices.countByFollower(user.tiktokId),
+                LikeServices.countLikesByPublisherId(user.tiktokId),
+            ]);
+            if (countByFollowingRes.code === 'OK') {
+                setNumberOfFollower(countByFollowingRes.data);
+            }
+            if (countByFollowerRes.code === 'OK') {
+                setNumberOfFollowing(countByFollowerRes.data);
+            }
+            if (countLikeRes.code === 'OK') {
+                setNumberOfLike(countLikeRes.data);
             }
         };
         countFollowOfUser();
-    }, [user.tiktokId, followed]);
+    }, [user.tiktokId]);
 
     const handleSort = (sortBy) => {
         setSortOption(sortBy);
     };
 
     const handleAddFollow = async () => {
-        if (userAuth) {
-            const response = await FollowServices.addFollow(user.tiktokId);
-            if (response.code === 'OK') setFollowed(true);
+        if (!isLoadingAuth) {
+            if (isAuthenticated) {
+                const response = await FollowServices.addFollow(user.tiktokId);
+                if (response.code === 'OK') {
+                    socket.emit('addFollow', {
+                        followingId: user.tiktokId,
+                        followerId: userAuth.tiktokId,
+                    });
+                    socket.emit('updateFollowCountOfProfile', {
+                        followerId: userAuth.tiktokId,
+                        followingId: user.tiktokId,
+                        action: 'follow',
+                    });
+                }
+            } else {
+                openModal();
+            }
         }
     };
 
     const handleUnFollow = async () => {
-        if (userAuth) {
-            const response = await FollowServices.removeFollow(user.tiktokId);
-            if (response.code === 'OK') setFollowed(false);
+        if (followStatus === 3) {
+            const confirmed = await showConfirmDialog({
+                title: 'Bạn chắc chắn muốn bỏ follow?',
+                text: 'Bạn và người này đang là bạn bè.',
+                confirmText: 'Bỏ follow',
+                cancelText: 'Hủy',
+            });
+            if (!confirmed) return;
+        }
+        const response = await FollowServices.removeFollow(user.tiktokId);
+        if (response.code === 'OK') {
+            socket.emit('updateFollowCountOfProfile', {
+                followerId: userAuth.tiktokId,
+                followingId: user.tiktokId,
+                action: 'unfollow',
+            });
+            socket.emit('deletedFollow', { followerId: userAuth.tiktokId, followingId: user.tiktokId, type: 'follow' });
         }
     };
 
@@ -153,14 +239,14 @@ function Profile() {
                                 </>
                             ) : (
                                 <>
-                                    {followed ? (
+                                    {followStatus === 1 || followStatus === 3 ? (
                                         <Button
                                             bgSecondary
                                             className={cx('btn-item', 'custom')}
                                             onClick={handleUnFollow}
                                         >
                                             <FollowCheckIcon />
-                                            Đang follow
+                                            {followStatus === 1 ? 'Đang follow' : 'Bạn bè'}
                                         </Button>
                                     ) : (
                                         <Button
@@ -168,7 +254,7 @@ function Profile() {
                                             className={cx('btn-item', 'custom')}
                                             onClick={handleAddFollow}
                                         >
-                                            Follow
+                                            {followStatus === 2 ? 'Follow lại' : 'Follow'}
                                         </Button>
                                     )}
                                     <Button bgSecondary className={cx('btn-item', 'custom')}>
@@ -187,7 +273,7 @@ function Profile() {
                         </div>
                         <h3 className={cx('number-container')}>
                             <div className={cx('number-item')}>
-                                <strong className={cx('number')}>165</strong>
+                                <strong className={cx('number')}>{numberOfFollowing}</strong>
                                 <span className={cx('number-text')}>Đang follow</span>
                             </div>
                             <div className={cx('number-item')}>
@@ -195,7 +281,7 @@ function Profile() {
                                 <span className={cx('number-text')}>Follower</span>
                             </div>
                             <div className={cx('number-item')}>
-                                <strong className={cx('number')}>165</strong>
+                                <strong className={cx('number')}>{numberOfLike}</strong>
                                 <span className={cx('number-text')}>Thích</span>
                             </div>
                         </h3>
